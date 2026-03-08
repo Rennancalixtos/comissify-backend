@@ -6,7 +6,6 @@ use App\Models\Account;
 use App\Models\PostQueue;
 use App\Models\Video;
 use App\Services\AiTextService;
-use App\Services\ShopeeApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,7 +24,7 @@ class GenerateTextJob implements ShouldQueue
         public readonly int $videoId,
     ) {}
 
-    public function handle(AiTextService $ai, ShopeeApiService $shopee): void
+    public function handle(AiTextService $ai): void
     {
         $video = Video::with('product')->find($this->videoId);
 
@@ -48,7 +47,7 @@ class GenerateTextJob implements ShouldQueue
         $title         = $ai->generateTitle($product);
         $description   = $ai->generateDescription($product);
         $hashtags      = $ai->generateHashtags($product);
-        $affiliateLink = $shopee->generateAffiliateLink($product->shopee_product_id);
+        $affiliateLink = "https://shopee.com.br/product/{$product->shopee_product_id}";
 
         Log::info('GenerateTextJob: conteúdo gerado', [
             'video_id' => $video->id,
