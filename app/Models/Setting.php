@@ -9,7 +9,6 @@ class Setting extends Model
 {
     protected $fillable = ['key', 'value', 'description'];
 
-    // ─── Static helpers ──────────────────────────────────────────────────
 
     /**
      * Get a setting value by key, with an optional default.

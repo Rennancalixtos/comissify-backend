@@ -34,7 +34,6 @@ class PostQueue extends Model
         'posted_at'    => 'datetime',
     ];
 
-    // ─── Relationships ───────────────────────────────────────────────────
 
     public function video(): BelongsTo
     {
@@ -46,7 +45,6 @@ class PostQueue extends Model
         return $this->belongsTo(Account::class);
     }
 
-    // ─── Scopes ──────────────────────────────────────────────────────────
 
     public function scopePending($query)
     {
@@ -66,7 +64,6 @@ class PostQueue extends Model
         return $query->where('status', 'failed');
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────
 
     public function getHashtagsStringAttribute(): string
     {

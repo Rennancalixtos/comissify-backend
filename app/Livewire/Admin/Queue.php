@@ -76,7 +76,6 @@ class Queue extends Component
         session()->flash('success', 'Item adicionado à fila.');
     }
 
-    // ─── Inline edit ─────────────────────────────────────────────────────────
 
     public function saveField(int $id, string $field, string $value): void
     {
@@ -92,7 +91,6 @@ class Queue extends Component
         PostQueue::findOrFail($id)->update([$field => $value]);
     }
 
-    // ─── Status actions ──────────────────────────────────────────────────────
 
     public function markAsPosted(int $id): void
     {

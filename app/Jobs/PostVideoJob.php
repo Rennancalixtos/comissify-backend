@@ -22,9 +22,6 @@ class PostVideoJob implements ShouldQueue
         public readonly int $postQueueId,
     ) {}
 
-    /**
-     * Queue this job on the "posting" queue (processed by Horizon).
-     */
     public function handle(AppiumService $appium): void
     {
         // TODO: Implementation steps

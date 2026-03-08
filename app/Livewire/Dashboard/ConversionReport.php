@@ -8,20 +8,17 @@ use Livewire\Component;
 
 class ConversionReport extends Component
 {
-    // ─── Filters ───────────────────────────────────────────────────────────────
     public string $period = '30';   // days: 7, 30, 90, or 'custom'
     public string $dateStart = '';
     public string $dateEnd   = '';
     public string $orderStatus = '';
 
-    // ─── State ─────────────────────────────────────────────────────────────────
     public array  $nodes    = [];
     public array  $pageInfo = [];
     public ?string $error   = null;
     public bool   $loading  = false;
     public bool   $hasAccess = false;
 
-    // ─── Pagination ────────────────────────────────────────────────────────────
     public ?string $scrollId     = null;
     public array   $scrollStack  = [];  // stack for back-navigation
     public int     $currentPage  = 1;
@@ -140,7 +137,6 @@ class ConversionReport extends Component
         return [strtotime("-{$days} days"), time()];
     }
 
-    // ─── Summary helpers ───────────────────────────────────────────────────────
 
     public function getTotalCommissionProperty(): string
     {

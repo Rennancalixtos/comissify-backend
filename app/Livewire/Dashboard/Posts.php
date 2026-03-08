@@ -11,7 +11,6 @@ use Livewire\Component;
 
 class Posts extends Component
 {
-    // ─── State ────────────────────────────────────────────────────────────────
     public ?int    $selectedLinkId = null;
     public string  $activeTab      = '';   // 'text'|'image'|'video'|'pinterest'
 
@@ -27,10 +26,8 @@ class Posts extends Component
 
     public function mount(): void
     {
-        // nothing needed
     }
 
-    // ─── Computed ─────────────────────────────────────────────────────────────
 
     public function getLinksProperty()
     {
@@ -64,7 +61,6 @@ class Posts extends Component
             ->toArray();
     }
 
-    // ─── Actions ──────────────────────────────────────────────────────────────
 
     public function selectLink(int $linkId): void
     {
@@ -177,7 +173,6 @@ class Posts extends Component
         $this->pinterestPins = $result['pins'];
     }
 
-    // ─── Mock processor ───────────────────────────────────────────────────────
 
     private function processMock(UserPost $post, UserAffiliateLink $link, string $type): void
     {
@@ -201,7 +196,6 @@ class Posts extends Component
         $post->update(['status' => 'completed', 'result' => $result]);
     }
 
-    // ─── Render ───────────────────────────────────────────────────────────────
 
     public function render()
     {

@@ -66,7 +66,6 @@ class ProductSearch extends Component
         $wallet = $user->ensureTokenWallet();
         $cred   = $user->credential;
 
-        /** @var ShopeeAffiliateService $service */
         $service = app(ShopeeAffiliateService::class);
 
         $result = $service->getProducts($cred, [
@@ -121,7 +120,6 @@ class ProductSearch extends Component
         $cost  = $this->searchCost;
         $cred  = $user->credential;
 
-        /** @var ShopeeAffiliateService $service */
         $service = app(ShopeeAffiliateService::class);
 
         $result = $service->getProducts($cred, [
@@ -156,7 +154,6 @@ class ProductSearch extends Component
             return;
         }
 
-        /** @var ShopeeAffiliateService $service */
         $service = app(ShopeeAffiliateService::class);
 
         $product = collect($this->products)->firstWhere('productLink', $productLink)
@@ -201,7 +198,6 @@ class ProductSearch extends Component
             return;
         }
 
-        /** @var ShopeeAffiliateService $service */
         $service = app(ShopeeAffiliateService::class);
         $results = [];
 

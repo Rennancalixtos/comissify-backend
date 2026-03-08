@@ -15,7 +15,6 @@ class Tokens extends Component
 {
     use WithPagination;
 
-    // ─── Package CRUD ──────────────────────────────────────────────────────────
     public bool   $showPackageModal = false;
     public ?int   $editingPackageId = null;
     public string $pkgName          = '';
@@ -24,17 +23,14 @@ class Tokens extends Component
     public bool   $pkgActive        = true;
     public bool   $pkgFeatured      = false;
 
-    // ─── System prices ─────────────────────────────────────────────────────────
     public float  $priceSearch = 0;
     public float  $priceLink   = 0;
 
-    // ─── Add tokens to user ────────────────────────────────────────────────────
     public bool   $showAddTokensModal = false;
     public ?int   $addTokensUserId    = null;
     public float  $addTokensAmount    = 0;
     public string $addTokensDesc      = '';
 
-    // ─── User transactions modal ───────────────────────────────────────────────
     public bool   $showTransactionsModal = false;
     public ?int   $transactionsUserId    = null;
 
@@ -44,7 +40,6 @@ class Tokens extends Component
         $this->priceLink   = SystemPrice::get('link_generation_cost');
     }
 
-    // ── Packages ───────────────────────────────────────────────────────────────
 
     public function openNewPackage(): void
     {
@@ -105,7 +100,6 @@ class Tokens extends Component
         $this->pkgFeatured      = false;
     }
 
-    // ── System prices ──────────────────────────────────────────────────────────
 
     public function savePrices(): void
     {
@@ -120,7 +114,6 @@ class Tokens extends Component
         session()->flash('price_saved', 'Preços atualizados com sucesso.');
     }
 
-    // ── Add tokens ─────────────────────────────────────────────────────────────
 
     public function openAddTokens(int $userId): void
     {
@@ -143,7 +136,6 @@ class Tokens extends Component
         $this->showAddTokensModal = false;
     }
 
-    // ── Transactions ───────────────────────────────────────────────────────────
 
     public function openTransactions(int $userId): void
     {

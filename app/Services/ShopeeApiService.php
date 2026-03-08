@@ -23,23 +23,6 @@ class ShopeeApiService
         $this->timeout     = (int) env('SHOPEE_REQUEST_TIMEOUT', 30);
     }
 
-    /**
-     * Fetch a ranked list of top-performing products from the Shopee Affiliate API.
-     *
-     * @param  string  $category  Optional category slug to filter results.
-     * @param  int     $limit     Maximum number of products to return (default 50).
-     * @return array<int, array{
-     *     shopee_product_id: string,
-     *     name: string,
-     *     category: string,
-     *     price: float,
-     *     commission_rate: float,
-     *     rating: float,
-     *     sales_count: int,
-     * }>
-     *
-     * @throws \RuntimeException When the API returns an unexpected response.
-     */
     public function getTopProducts(string $category = '', int $limit = 50): array
     {
         // TODO:
@@ -51,22 +34,6 @@ class ShopeeApiService
         return [];
     }
 
-    /**
-     * Retrieve detailed information for a single product by its Shopee product ID.
-     *
-     * @param  string  $shopeeProductId  The unique product identifier on Shopee.
-     * @return array{
-     *     shopee_product_id: string,
-     *     name: string,
-     *     category: string,
-     *     price: float,
-     *     commission_rate: float,
-     *     rating: float,
-     *     sales_count: int,
-     *     description: string,
-     *     images: string[],
-     * }|null  Null if the product is not found or the API returns an error.
-     */
     public function getProductDetails(string $shopeeProductId): ?array
     {
         // TODO:
@@ -75,14 +42,6 @@ class ShopeeApiService
         return null;
     }
 
-    /**
-     * Generate a trackable Shopee affiliate deep-link for the given product.
-     *
-     * @param  string  $shopeeProductId  The unique product identifier on Shopee.
-     * @return string  The shortened affiliate URL (bit.ly-style or shopee.link).
-     *
-     * @throws \RuntimeException When affiliate link generation fails.
-     */
     public function generateAffiliateLink(string $shopeeProductId): string
     {
         // Se a API não estiver configurada, retorna um placeholder navegável
@@ -101,7 +60,6 @@ class ShopeeApiService
         );
     }
 
-    // ─── Private helpers ─────────────────────────────────────────────────
 
     private function buildSignature(array $params): string
     {
