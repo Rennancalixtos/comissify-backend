@@ -1,0 +1,173 @@
+<?php
+
+namespace App\Livewire\Admin;
+
+use App\Models\SystemPrice;
+use App\Models\TokenPackage;
+use App\Models\TokenTransaction;
+use App\Models\User;
+use App\Models\UserToken;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class Tokens extends Component
+{
+    use WithPagination;
+
+    // ─── Package CRUD ──────────────────────────────────────────────────────────
+    public bool   $showPackageModal = false;
+    public ?int   $editingPackageId = null;
+    public string $pkgName          = '';
+    public float  $pkgTokens        = 0;
+    public float  $pkgPrice         = 0;
+    public bool   $pkgActive        = true;
+    public bool   $pkgFeatured      = false;
+
+    // ─── System prices ─────────────────────────────────────────────────────────
+    public float  $priceSearch = 0;
+    public float  $priceLink   = 0;
+
+    // ─── Add tokens to user ────────────────────────────────────────────────────
+    public bool   $showAddTokensModal = false;
+    public ?int   $addTokensUserId    = null;
+    public float  $addTokensAmount    = 0;
+    public string $addTokensDesc      = '';
+
+    // ─── User transactions modal ───────────────────────────────────────────────
+    public bool   $showTransactionsModal = false;
+    public ?int   $transactionsUserId    = null;
+
+    public function mount(): void
+    {
+        $this->priceSearch = SystemPrice::get('search_cost');
+        $this->priceLink   = SystemPrice::get('link_generation_cost');
+    }
+
+    // ── Packages ───────────────────────────────────────────────────────────────
+
+    public function openNewPackage(): void
+    {
+        $this->resetPackageForm();
+        $this->showPackageModal = true;
+    }
+
+    public function openEditPackage(int $id): void
+    {
+        $pkg = TokenPackage::findOrFail($id);
+        $this->editingPackageId = $id;
+        $this->pkgName          = $pkg->name;
+        $this->pkgTokens        = (float) $pkg->tokens_amount;
+        $this->pkgPrice         = (float) $pkg->price;
+        $this->pkgActive        = $pkg->is_active;
+        $this->pkgFeatured      = $pkg->is_featured;
+        $this->showPackageModal = true;
+    }
+
+    public function savePackage(): void
+    {
+        $this->validate([
+            'pkgName'    => 'required|string|max:100',
+            'pkgTokens'  => 'required|numeric|min:0.01',
+            'pkgPrice'   => 'required|numeric|min:0',
+        ]);
+
+        $data = [
+            'name'          => $this->pkgName,
+            'tokens_amount' => $this->pkgTokens,
+            'price'         => $this->pkgPrice,
+            'is_active'     => $this->pkgActive,
+            'is_featured'   => $this->pkgFeatured,
+        ];
+
+        if ($this->editingPackageId) {
+            TokenPackage::findOrFail($this->editingPackageId)->update($data);
+        } else {
+            TokenPackage::create($data);
+        }
+
+        $this->showPackageModal = false;
+        $this->resetPackageForm();
+    }
+
+    public function deletePackage(int $id): void
+    {
+        TokenPackage::findOrFail($id)->delete();
+    }
+
+    private function resetPackageForm(): void
+    {
+        $this->editingPackageId = null;
+        $this->pkgName          = '';
+        $this->pkgTokens        = 0;
+        $this->pkgPrice         = 0;
+        $this->pkgActive        = true;
+        $this->pkgFeatured      = false;
+    }
+
+    // ── System prices ──────────────────────────────────────────────────────────
+
+    public function savePrices(): void
+    {
+        $this->validate([
+            'priceSearch' => 'required|numeric|min:0',
+            'priceLink'   => 'required|numeric|min:0',
+        ]);
+
+        SystemPrice::set('search_cost', $this->priceSearch);
+        SystemPrice::set('link_generation_cost', $this->priceLink);
+
+        session()->flash('price_saved', 'Preços atualizados com sucesso.');
+    }
+
+    // ── Add tokens ─────────────────────────────────────────────────────────────
+
+    public function openAddTokens(int $userId): void
+    {
+        $this->addTokensUserId = $userId;
+        $this->addTokensAmount = 0;
+        $this->addTokensDesc   = 'Crédito manual pelo admin';
+        $this->showAddTokensModal = true;
+    }
+
+    public function confirmAddTokens(): void
+    {
+        $this->validate([
+            'addTokensAmount' => 'required|numeric|min:0.0001',
+            'addTokensDesc'   => 'required|string|max:255',
+        ]);
+
+        $user = User::findOrFail($this->addTokensUserId);
+        $user->ensureTokenWallet()->credit($this->addTokensAmount, $this->addTokensDesc);
+
+        $this->showAddTokensModal = false;
+    }
+
+    // ── Transactions ───────────────────────────────────────────────────────────
+
+    public function openTransactions(int $userId): void
+    {
+        $this->transactionsUserId  = $userId;
+        $this->showTransactionsModal = true;
+    }
+
+    public function render()
+    {
+        $packages     = TokenPackage::latest()->get();
+        $users        = User::where('is_admin', false)
+            ->with('token')
+            ->latest()
+            ->paginate(15);
+
+        $transactions = $this->transactionsUserId
+            ? TokenTransaction::where('user_id', $this->transactionsUserId)->latest()->take(50)->get()
+            : collect();
+
+        $transactionUser = $this->transactionsUserId
+            ? User::find($this->transactionsUserId)
+            : null;
+
+        return view('livewire.admin.tokens', compact('packages', 'users', 'transactions', 'transactionUser'))
+            ->layout('layouts.admin', ['title' => 'Gestão de Tokens']);
+    }
+}

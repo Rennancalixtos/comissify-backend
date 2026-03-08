@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+// ─── Landing ──────────────────────────────────────────────────────────────────
+Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');
+Route::post('/login',  [\App\Http\Controllers\Auth\AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
+
+// Multi-step registration — Livewire component
+Route::get('/register', \App\Livewire\Auth\Register::class)->name('register');
+
+// ─── Conectar Shopee ──────────────────────────────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/connect',  [\App\Http\Controllers\ConnectController::class, 'show'])->name('connect');
+    Route::post('/connect', [\App\Http\Controllers\ConnectController::class, 'store'])->name('connect.store');
+});
+
+// ─── Dashboard do cliente (auth only — mostra bloqueado se sem Shopee) ────────
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', \App\Livewire\Dashboard\ProductSearch::class)->name('dashboard');
+    Route::get('/posts',     \App\Livewire\Dashboard\Posts::class)->name('posts');
+    Route::get('/relatorio', \App\Livewire\Dashboard\ConversionReport::class)->name('report');
+    Route::get('/creditos',  \App\Livewire\Dashboard\Credits::class)->name('credits');
+});
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/',           \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+    Route::get('/products',   \App\Livewire\Admin\Products::class)->name('products.index');
+    Route::get('/videos',     \App\Livewire\Admin\Videos::class)->name('videos.index');
+    Route::get('/queue',      \App\Livewire\Admin\Queue::class)->name('queue.index');
+    Route::get('/accounts',   \App\Livewire\Admin\Accounts::class)->name('accounts.index');
+    Route::get('/settings',   \App\Livewire\Admin\Settings::class)->name('settings.index');
+
+    // Fase 3
+    Route::get('/tokens',     \App\Livewire\Admin\Tokens::class)->name('tokens.index');
+    Route::get('/users',      \App\Livewire\Admin\Users::class)->name('users.index');
+
+    // Fase 5
+    Route::get('/screenshots', \App\Livewire\Admin\Screenshots::class)->name('screenshots.index');
+});

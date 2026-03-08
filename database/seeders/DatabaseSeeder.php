@@ -1,0 +1,80 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Account;
+use App\Models\SystemPrice;
+use App\Models\TokenPackage;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Admin user (is_admin = true)
+        \App\Models\User::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
+            [
+                'name'      => 'Admin',
+                'password'  => Hash::make(env('ADMIN_PASSWORD', 'password')),
+                'is_admin'  => true,
+                'is_active' => true,
+            ]
+        );
+
+        // Conta de postagem padrão (pipeline de vídeo)
+        Account::updateOrCreate(
+            ['shopee_username' => 'shopee_affiliate_main'],
+            [
+                'name'             => 'Conta Principal',
+                'daily_post_limit' => 10,
+                'status'           => 'active',
+            ]
+        );
+
+        // Pacotes de tokens
+        TokenPackage::updateOrCreate(['name' => 'Starter'], [
+            'tokens_amount' => 50,
+            'price'         => 9.90,
+            'is_active'     => true,
+            'is_featured'   => false,
+        ]);
+        TokenPackage::updateOrCreate(['name' => 'Pro'], [
+            'tokens_amount' => 150,
+            'price'         => 24.90,
+            'is_active'     => true,
+            'is_featured'   => true,
+        ]);
+        TokenPackage::updateOrCreate(['name' => 'Enterprise'], [
+            'tokens_amount' => 500,
+            'price'         => 69.90,
+            'is_active'     => true,
+            'is_featured'   => false,
+        ]);
+
+        // Preços do sistema
+        SystemPrice::updateOrCreate(['key' => 'search_cost'], [
+            'value'       => 0.020000,
+            'description' => 'Custo por busca de produtos',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'link_generation_cost'], [
+            'value'       => 0.010000,
+            'description' => 'Custo por link afiliado gerado',
+        ]);
+
+        // Configurações de tema
+        \App\Models\Setting::updateOrCreate(['key' => 'theme_color'], [
+            'value'       => 'purple',
+            'description' => 'Tema de cor da plataforma (purple|green|blue|orange)',
+        ]);
+
+        // Screenshots da landing (placeholders)
+        \App\Models\LandingScreenshot::updateOrCreate(['order' => 1], ['title' => 'Dashboard de produtos',    'image_path' => 'landing/placeholder-1.png', 'order' => 1, 'is_active' => true]);
+        \App\Models\LandingScreenshot::updateOrCreate(['order' => 2], ['title' => 'Geração de links em lote', 'image_path' => 'landing/placeholder-2.png', 'order' => 2, 'is_active' => true]);
+        \App\Models\LandingScreenshot::updateOrCreate(['order' => 3], ['title' => 'Relatório de comissões',   'image_path' => 'landing/placeholder-3.png', 'order' => 3, 'is_active' => true]);
+
+        // Produtos de teste (pipeline de vídeo)
+        $this->call(ProductSeeder::class);
+    }
+}
