@@ -1,4 +1,4 @@
-# Comissify — Plataforma de Afiliados Shopee
+# Comissify — Plataforma de Automatização para Afiliados Shopee
 
 Plataforma SaaS para afiliados Shopee. Permite buscar produtos com melhores comissões, gerar links afiliados, criar conteúdo (texto, imagem, vídeo, Pinterest) e acompanhar relatórios de conversão.
 
