@@ -89,7 +89,6 @@ class Settings extends Component
         session()->flash('success', 'Configuração removida.');
     }
 
-    // ─── Theme ───────────────────────────────────────────────────────────
 
     public function setTheme(string $slug): void
     {

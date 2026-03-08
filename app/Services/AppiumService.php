@@ -24,25 +24,6 @@ class AppiumService
         $this->appActivity  = env('APPIUM_APP_ACTIVITY', 'com.shopee.id.MainActivity');
     }
 
-    /**
-     * Automate posting a video to Shopee using the Appium WebDriver.
-     *
-     * This method controls the Shopee mobile app through ADB/Appium to:
-     *   1. Launch the Shopee app with the account's session.
-     *   2. Navigate to the video creation / ShopeeVideo section.
-     *   3. Upload the video file from the device's local storage.
-     *   4. Fill in the post title, description, and affiliate link.
-     *   5. Submit the post and capture the returned Shopee video ID.
-     *
-     * @param  Account  $account       The Shopee account to post from.
-     * @param  string   $videoPath     Absolute path to the MP4 file on the host/container.
-     * @param  string   $title         Post title (≤ 100 chars).
-     * @param  string   $description   Post caption / description.
-     * @param  string   $affiliateLink Shopee affiliate URL to append to the description.
-     * @return array{success: bool, shopee_video_id: string, error: string}
-     *
-     * @throws \RuntimeException When Appium server is unreachable or session fails.
-     */
     public function postVideo(
         Account $account,
         string  $videoPath,
@@ -85,27 +66,12 @@ class AppiumService
         return ['success' => false, 'shopee_video_id' => '', 'error' => 'Not implemented'];
     }
 
-    /**
-     * Check whether the Appium server is reachable and responsive.
-     *
-     * @return bool  True if the /status endpoint returns a 200 response.
-     */
     public function isServerAvailable(): bool
     {
         // TODO: GET {serverUrl}/status, return true if HTTP 200.
         return false;
     }
 
-    /**
-     * Restore (or create) a Shopee session for the given account.
-     *
-     * Loads the session_data (cookies/tokens) stored in the Account model
-     * and injects them into the current Appium WebDriver session so the app
-     * starts in a logged-in state without requiring credentials.
-     *
-     * @param  Account  $account  The account whose session should be restored.
-     * @return bool               True if the session was successfully restored.
-     */
     public function restoreSession(Account $account): bool
     {
         // TODO:
@@ -115,7 +81,6 @@ class AppiumService
         return false;
     }
 
-    // ─── Private helpers ─────────────────────────────────────────────────
 
     private function buildCapabilities(): array
     {

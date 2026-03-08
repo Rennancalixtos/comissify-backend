@@ -15,14 +15,7 @@ class ShopeeAffiliateService
         $this->endpoint = env('SHOPEE_AFFILIATE_API_URL', 'https://open-api.affiliate.shopee.com.br/graphql');
     }
 
-    // ─── Public API ────────────────────────────────────────────────────────────
 
-    /**
-     * Search products using productOfferV2 query.
-     *
-     * @param  array{keyword?:string, productCatId?:int, sortType?:int, page?:int, limit?:int}  $params
-     * @return array{nodes: array, pageInfo: array, error?: string}
-     */
     public function getProducts(UserCredential $cred, array $params = []): array
     {
         if (env('SHOPEE_MOCK', false)) {
@@ -92,9 +85,6 @@ class ShopeeAffiliateService
         ];
     }
 
-    /**
-     * Generate a short affiliate link via generateShortLink mutation.
-     */
     public function generateShortLink(UserCredential $cred, string $originUrl, array $subIds = []): string
     {
         if (env('SHOPEE_MOCK', false)) {
@@ -125,12 +115,6 @@ class ShopeeAffiliateService
         return $response['data']['generateShortLink']['shortLink'] ?? $originUrl;
     }
 
-    /**
-     * Fetch conversion report data (conversionReport query).
-     *
-     * @param  array{purchaseTimeStart?:int, purchaseTimeEnd?:int, orderStatus?:string, limit?:int, scrollId?:string}  $params
-     * @return array{nodes: array, pageInfo: array, error?: string}
-     */
     public function getConversionReport(UserCredential $cred, array $params = []): array
     {
         if (env('SHOPEE_MOCK', false)) {
@@ -205,9 +189,6 @@ class ShopeeAffiliateService
         ];
     }
 
-    /**
-     * Returns the main Shopee Brazil categories (static list).
-     */
     public function getCategories(): array
     {
         return [
@@ -233,7 +214,6 @@ class ShopeeAffiliateService
         ];
     }
 
-    // ─── Private helpers ───────────────────────────────────────────────────────
 
     private function request(UserCredential $cred, string $query, array $variables = []): array
     {

@@ -24,16 +24,6 @@ class PinterestService
         $this->searchTimeout   = 60;
     }
 
-    /**
-     * Search Pinterest for videos matching any of the given terms.
-     *
-     * Runs yt-dlp for each term extracting metadata without downloading.
-     * Filters by duration 10s–55s (safety margin under the 60s Shopee limit).
-     *
-     * @param  array<string>  $terms  Search terms from AiTextService::generateSearchTerms.
-     * @param  int            $limit  Max results per term.
-     * @return array<int, array{url: string, title: string, duration: int, term: string}>
-     */
     public function searchVideos(array $terms, int $limit = 5): array
     {
         $candidates = [];
@@ -56,16 +46,6 @@ class PinterestService
         return $unique;
     }
 
-    /**
-     * Download a Pinterest video to the given output directory.
-     *
-     * Calls pinterest_downloader.py and parses JSON output.
-     * The filename is generated automatically (UUID.mp4).
-     *
-     * @param  string  $url        Pinterest pin or video URL.
-     * @param  string  $outputDir  Absolute directory path.
-     * @return array{success: bool, filepath: string, error: string, size_mb: float}
-     */
     public function downloadVideo(string $url, string $outputDir): array
     {
         if (! is_dir($outputDir)) {
@@ -110,14 +90,7 @@ class PinterestService
         }
     }
 
-    // ─── Pinterest API v5 — Pin Search ────────────────────────────────────────
 
-    /**
-     * Search public pins via Pinterest API v5.
-     * Returns array of pin objects for display/download in the Posts page.
-     *
-     * @return array{pins: array, bookmark: string|null, error?: string}
-     */
     public function searchPins(string $query, int $pageSize = 12): array
     {
         if (env('PINTEREST_MOCK', true)) {
@@ -197,7 +170,6 @@ class PinterestService
         return ['pins' => $pins, 'bookmark' => null];
     }
 
-    // ─── Private ─────────────────────────────────────────────────────────────
 
     private function searchTerm(string $term, int $limit): array
     {

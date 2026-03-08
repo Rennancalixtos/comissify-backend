@@ -32,7 +32,6 @@ class ProcessProductCommand extends Command
         $this->info("Produto: {$product->name}");
         $this->newLine();
 
-        // ─── Passo 1: Gerar termos de busca ──────────────────────────────────
         $this->line('<fg=blue>[1/4]</> Gerando termos de busca via IA...');
 
         $terms = $ai->generateSearchTerms($product);
@@ -45,7 +44,6 @@ class ProcessProductCommand extends Command
         $this->line('  → '.implode(', ', $terms));
         $this->newLine();
 
-        // ─── Passo 2: Buscar e baixar vídeos ─────────────────────────────────
         $this->line('<fg=blue>[2/4]</> Buscando e baixando vídeos no Pinterest...');
 
         $candidates = $pinterest->searchVideos($terms, 5);
@@ -98,7 +96,6 @@ class ProcessProductCommand extends Command
 
         $this->newLine();
 
-        // ─── Passo 3: Validar e normalizar ───────────────────────────────────
         $this->line('<fg=blue>[3/4]</> Validando e normalizando vídeos...');
 
         $approvedVideos = [];
@@ -182,7 +179,6 @@ class ProcessProductCommand extends Command
 
         $this->newLine();
 
-        // ─── Passo 4: Gerar conteúdo com IA ──────────────────────────────────
         $this->line('<fg=blue>[4/4]</> Gerando conteúdo via IA...');
 
         $account = \App\Models\Account::available()->first()

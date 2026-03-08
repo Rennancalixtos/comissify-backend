@@ -21,13 +21,6 @@ class AiTextService
         $this->temperature = (float) env('AI_TEMPERATURE', 0.9);
     }
 
-    /**
-     * Generate Pinterest search terms for a product.
-     *
-     * Returns exactly 3 terms: 2 in Portuguese and 1 in English.
-     *
-     * @return array<string>
-     */
     public function generateSearchTerms(Product $product): array
     {
         $prompt = "Dado o produto: '{$product->name}' da categoria '{$product->category}', "
@@ -53,9 +46,6 @@ class AiTextService
         ];
     }
 
-    /**
-     * Generate a video title ≤ 100 chars in Brazilian Portuguese.
-     */
     public function generateTitle(Product $product): string
     {
         $prompt = "Crie um título criativo e direto para um vídeo do produto '{$product->name}'. "
@@ -66,9 +56,6 @@ class AiTextService
         return mb_substr($title, 0, 100);
     }
 
-    /**
-     * Generate a short persuasive description (≤ 500 chars) in Brazilian Portuguese.
-     */
     public function generateDescription(Product $product): string
     {
         $prompt = "Crie uma descrição curta e envolvente para um vídeo do produto '{$product->name}' "
@@ -79,11 +66,6 @@ class AiTextService
         return trim($this->chat('Você é um especialista em marketing de afiliados na Shopee.', $prompt));
     }
 
-    /**
-     * Generate exactly 5 relevant hashtags as an array of strings (with # prefix).
-     *
-     * @return array<string>
-     */
     public function generateHashtags(Product $product): array
     {
         $prompt = "Gere 5 hashtags relevantes para um vídeo do produto '{$product->name}' "
@@ -103,7 +85,6 @@ class AiTextService
         return ['#shopee', '#shopeeafiliados', '#oferta', '#desconto', '#compras'];
     }
 
-    // ─── Private ─────────────────────────────────────────────────────────────
 
     private function chat(string $systemPrompt, string $userPrompt): string
     {
@@ -183,7 +164,6 @@ class AiTextService
         return $response->json('message.content', '');
     }
 
-    /** Parse a JSON string, tolerating markdown code fences. */
     private function parseJson(string $raw): array
     {
         // Strip ```json ... ``` fences if present

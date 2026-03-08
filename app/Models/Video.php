@@ -30,7 +30,6 @@ class Video extends Model
         'validated_at'     => 'datetime',
     ];
 
-    // ─── Relationships ───────────────────────────────────────────────────
 
     public function product(): BelongsTo
     {
@@ -42,7 +41,6 @@ class Video extends Model
         return $this->hasMany(PostQueue::class);
     }
 
-    // ─── Scopes ──────────────────────────────────────────────────────────
 
     public function scopeValid($query)
     {
@@ -54,7 +52,6 @@ class Video extends Model
         return $query->where('validation_status', 'pending');
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────
 
     public function isReadyToPost(): bool
     {

@@ -7,7 +7,6 @@ use Symfony\Component\Process\Process;
 
 class FFmpegService
 {
-    // Shopee video requirements
     public const MIN_WIDTH      = 1280;
     public const MIN_HEIGHT     = 720;
     public const TARGET_FPS     = 30;
@@ -29,11 +28,6 @@ class FFmpegService
         $this->ffprobeBin   = env('FFPROBE_PATH', '/usr/bin/ffprobe');
     }
 
-    /**
-     * Validate a video file against Shopee requirements via ffmpeg_validator.py.
-     *
-     * @return array{valid: bool, reason: string|null, metadata: array}
-     */
     public function validate(string $path): array
     {
         $result = $this->runScript('validate', $path);
@@ -45,13 +39,6 @@ class FFmpegService
         ];
     }
 
-    /**
-     * Normalize (re-encode) a video to meet all Shopee requirements.
-     *
-     * After a successful normalize, also generates a thumbnail from frame 1.
-     *
-     * @return array{success: bool, output_path: string, metadata: array, error: string|null}
-     */
     public function normalize(string $inputPath, string $outputPath): array
     {
         $result = $this->runScript('normalize', $inputPath, $outputPath);
@@ -66,12 +53,6 @@ class FFmpegService
         ];
     }
 
-    /**
-     * Extract metadata from a video file by running --action validate and
-     * returning only the metadata portion of the response.
-     *
-     * @return array{duration: int, width: int, height: int, video_codec: string, audio_codec: string, fps: float, file_size_mb: float}|null
-     */
     public function getMetadata(string $path): ?array
     {
         $result = $this->runScript('validate', $path);
@@ -80,13 +61,6 @@ class FFmpegService
         return ! empty($meta) ? $meta : null;
     }
 
-    /**
-     * Generate a thumbnail (JPEG) from the first second of a video file.
-     *
-     * @param  string  $videoPath      Absolute path to the MP4.
-     * @param  string  $thumbnailPath  Absolute path for the output JPEG.
-     * @return bool
-     */
     public function generateThumbnail(string $videoPath, string $thumbnailPath): bool
     {
         $dir = dirname($thumbnailPath);
@@ -120,7 +94,6 @@ class FFmpegService
         }
     }
 
-    // ─── Private helpers ─────────────────────────────────────────────────
 
     private function runScript(string $action, string $input, string $output = ''): array
     {

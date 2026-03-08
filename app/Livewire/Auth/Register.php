@@ -54,7 +54,6 @@ class Register extends Component
         };
     }
 
-    // ── Step 1 ────────────────────────────────────────────────────────
 
     public function submitStep1(): void
     {
@@ -109,7 +108,6 @@ class Register extends Component
         if ($user) $this->sendOtp($user);
     }
 
-    // ── Step 2 ────────────────────────────────────────────────────────
 
     public function submitStep2(): void
     {
@@ -138,7 +136,6 @@ class Register extends Component
         $this->step = 3;
     }
 
-    // ── Step 3 ────────────────────────────────────────────────────────
 
     public function submitStep3(): void
     {

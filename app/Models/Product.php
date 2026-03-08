@@ -32,14 +32,12 @@ class Product extends Model
         'last_synced_at'    => 'datetime',
     ];
 
-    // ─── Relationships ───────────────────────────────────────────────────
 
     public function videos(): HasMany
     {
         return $this->hasMany(Video::class);
     }
 
-    // ─── Scopes ──────────────────────────────────────────────────────────
 
     public function scopeActive($query)
     {
@@ -51,7 +49,6 @@ class Product extends Model
         return $query->active()->orderByDesc('opportunity_score')->limit($limit);
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────
 
     public function getFormattedPriceAttribute(): string
     {

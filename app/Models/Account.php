@@ -27,14 +27,12 @@ class Account extends Model
         'last_post_at'     => 'datetime',
     ];
 
-    // ─── Relationships ───────────────────────────────────────────────────
 
     public function postQueue(): HasMany
     {
         return $this->hasMany(PostQueue::class);
     }
 
-    // ─── Encrypted session_data ──────────────────────────────────────────
 
     public function getSessionDataAttribute(?string $value): ?array
     {
@@ -56,7 +54,6 @@ class Account extends Model
             : null;
     }
 
-    // ─── Scopes ──────────────────────────────────────────────────────────
 
     public function scopeActive($query)
     {
@@ -69,7 +66,6 @@ class Account extends Model
             ->whereColumn('posts_today', '<', 'daily_post_limit');
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────
 
     public function canPost(): bool
     {

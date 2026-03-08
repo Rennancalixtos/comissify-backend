@@ -128,7 +128,6 @@ class ValidateVideoJob implements ShouldQueue
         return 'videos';
     }
 
-    // ─── Private helpers ─────────────────────────────────────────────────────
 
     private function reject(Video $video, string $reason): void
     {

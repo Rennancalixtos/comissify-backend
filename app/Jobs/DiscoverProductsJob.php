@@ -23,9 +23,6 @@ class DiscoverProductsJob implements ShouldQueue
         public readonly int    $limit    = 50,
     ) {}
 
-    /**
-     * Queue this job on the "products" queue (processed by Horizon).
-     */
     public function handle(ShopeeApiService $shopee): void
     {
         // TODO: Implementation steps
