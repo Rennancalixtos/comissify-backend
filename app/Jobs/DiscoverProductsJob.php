@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Product;
-use App\Services\ShopeeApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +22,7 @@ class DiscoverProductsJob implements ShouldQueue
         public readonly int    $limit    = 50,
     ) {}
 
-    public function handle(ShopeeApiService $shopee): void
+    public function handle(): void
     {
         // TODO: Implementation steps
         // 1. Call $shopee->getTopProducts($this->category, $this->limit)

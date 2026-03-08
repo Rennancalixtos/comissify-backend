@@ -7,7 +7,6 @@ use App\Models\Video;
 use App\Services\AiTextService;
 use App\Services\FFmpegService;
 use App\Services\PinterestService;
-use App\Services\ShopeeApiService;
 use Illuminate\Console\Command;
 
 class ProcessProductCommand extends Command
@@ -19,7 +18,6 @@ class ProcessProductCommand extends Command
         AiTextService    $ai,
         PinterestService $pinterest,
         FFmpegService    $ffmpeg,
-        ShopeeApiService $shopee,
     ): int {
         $productId = (int) $this->argument('product_id');
         $product   = Product::find($productId);
@@ -192,7 +190,7 @@ class ProcessProductCommand extends Command
             $title         = $ai->generateTitle($product);
             $description   = $ai->generateDescription($product);
             $hashtags      = $ai->generateHashtags($product);
-            $affiliateLink = $shopee->generateAffiliateLink($product->shopee_product_id);
+            $affiliateLink = "https://shopee.com.br/product/{$product->shopee_product_id}";
 
             $this->line("  → Título: <fg=yellow>\"{$title}\"</>");
             $this->line('  → Descrição: gerada ('.mb_strlen($description).' chars)');
