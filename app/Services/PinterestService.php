@@ -91,46 +91,74 @@ class PinterestService
     }
 
 
-    public function searchPins(string $query, int $pageSize = 12): array
+    public function searchPins(string $query, int $pageSize = 12, ?string $cursor = null): array
     {
-        if (env('PINTEREST_MOCK', true)) {
-            return $this->mockSearchPins($query, $pageSize);
-        }
-
-        $token = env('PINTEREST_ACCESS_TOKEN');
+        $apiKey = config('services.pinterest.scraper_key');
 
         try {
+            $params = ['query' => $query];
+            if ($cursor) {
+                $params['cursor'] = $cursor;
+            }
+
             $response = Http::timeout(15)
-                ->withToken($token)
-                ->get('https://api.pinterest.com/v5/search/pins', [
-                    'query'     => $query,
-                    'page_size' => $pageSize,
-                ]);
+                ->withHeader('x-api-key', $apiKey)
+                ->get('https://api.scrapecreators.com/v1/pinterest/search', $params);
 
             $body = $response->json();
 
-            if (!isset($body['items'])) {
-                return ['pins' => [], 'bookmark' => null, 'error' => 'Nenhum resultado.'];
+            if (empty($body['success']) || !isset($body['pins'])) {
+                return ['pins' => [], 'cursor' => null, 'error' => 'Nenhum resultado.'];
             }
 
-            $pins = collect($body['items'])->map(fn ($item) => [
-                'id'         => $item['id'],
-                'title'      => $item['title'] ?? '',
-                'link'       => $item['link'] ?? null,
-                'image_url'  => $item['media']['images']['orig']['url']
-                             ?? $item['media']['images']['600x']['url']
-                             ?? null,
-                'media_type' => $item['media']['media_type'] ?? 'image',
-                'video_url'  => $item['media']['videos']['V_720P']['url']
-                             ?? $item['media']['videos']['V_HLS']['url']
-                             ?? null,
-            ])->values()->all();
+            // Debug: log total pins and video structure
+            $totalPins  = count($body['pins']);
+            $pinsWVideo = collect($body['pins'])->filter(fn($p) => !empty($p['videos']))->count();
+            Log::info('Pinterest search result', ['query' => $query, 'total_pins' => $totalPins, 'pins_with_video' => $pinsWVideo]);
+            $firstVideo = collect($body['pins'])->first(fn($p) => !empty($p['videos']));
+            if ($firstVideo) {
+                Log::info('Pinterest video_list keys', [
+                    'keys'   => array_keys($firstVideo['videos']['video_list'] ?? []),
+                    'sample' => array_map(fn($v) => $v['url'] ?? null, $firstVideo['videos']['video_list'] ?? []),
+                ]);
+            }
 
-            return ['pins' => $pins, 'bookmark' => $body['bookmark'] ?? null];
+            $pins = collect($body['pins'])
+                ->map(function ($pin) {
+                    $videos    = $pin['videos'] ?? null;
+                    $videoList = $videos['video_list'] ?? [];
+                    // Pinterest only provides HLS streams — yt-dlp handles download/conversion
+                    $videoUrl = $videoList['V_720P']['url']
+                             ?? $videoList['V_480P']['url']
+                             ?? $videoList['V_360P']['url']
+                             ?? $videoList['V_HLSV4']['url']
+                             ?? $videoList['V_HLSV3_MOBILE']['url']
+                             ?? null;
+                    return [
+                        'id'         => $pin['id'],
+                        'title'      => $pin['grid_title'] ?? $pin['title'] ?? $pin['description'] ?? '',
+                        'link'       => $pin['link'] ?? $pin['url'],
+                        'pin_url'    => $pin['url'],
+                        'image_url'  => $pin['images']['orig']['url'] ?? null,
+                        'media_type' => ($videos && $videoUrl) ? 'video' : 'image',
+                        'video_url'  => $videoUrl,
+                    ];
+                })
+                ->filter(function ($pin) {
+                    // Only videos with a direct MP4 URL; exclude Instagram content
+                    return $pin['media_type'] === 'video'
+                        && $pin['video_url']
+                        && !str_contains($pin['link'] ?? '', 'instagram.com');
+                })
+                ->take($pageSize)
+                ->values()
+                ->all();
+
+            return ['pins' => $pins, 'cursor' => $body['cursor'] ?? null];
 
         } catch (\Throwable $e) {
             Log::error('PinterestService::searchPins failed', ['message' => $e->getMessage()]);
-            return ['pins' => [], 'bookmark' => null, 'error' => 'Falha ao buscar no Pinterest.'];
+            return ['pins' => [], 'cursor' => null, 'error' => 'Falha ao buscar no Pinterest.'];
         }
     }
 

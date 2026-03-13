@@ -19,6 +19,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/connect', [\App\Http\Controllers\ConnectController::class, 'store'])->name('connect.store');
 });
 
+// ─── Proxy de download (imagens/vídeos externos) ──────────────────────────────
+Route::middleware('auth')->get('/download-proxy', [\App\Http\Controllers\DownloadProxyController::class, 'download'])->name('download.proxy');
+
 // ─── Dashboard do cliente (auth only — mostra bloqueado se sem Shopee) ────────
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', \App\Livewire\Dashboard\ProductSearch::class)->name('dashboard');

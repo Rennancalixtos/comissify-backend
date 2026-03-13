@@ -26,21 +26,18 @@ class ConnectController extends Controller
             'app_secret' => 'required|string',
         ]);
 
-        // Em modo mock, aceita qualquer credencial sem chamar a API
-        if (! env('SHOPEE_MOCK', false)) {
-            $tempCred = new UserCredential([
-                'user_id'    => Auth::id(),
-                'app_id'     => $request->app_id,
-                'app_secret' => $request->app_secret,
-            ]);
+        $tempCred = new UserCredential([
+            'user_id'    => Auth::id(),
+            'app_id'     => $request->app_id,
+            'app_secret' => $request->app_secret,
+        ]);
 
-            $result = $shopee->getProducts($tempCred, ['limit' => 1]);
+        $result = $shopee->getProducts($tempCred, ['limit' => 1]);
 
-            if (isset($result['error'])) {
-                return back()
-                    ->withInput($request->only('app_id'))
-                    ->with('error', $result['error']);
-            }
+        if (isset($result['error'])) {
+            return back()
+                ->withInput($request->only('app_id'))
+                ->with('error', $result['error']);
         }
 
         // Salvar credenciais criptografadas
