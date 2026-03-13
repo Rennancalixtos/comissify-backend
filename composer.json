@@ -11,7 +11,8 @@
         "laravel/sanctum": "^4.0",
         "livewire/livewire": "^3.5",
         "opcodesio/log-viewer": "^3.23",
-        "predis/predis": "^2.2"
+        "predis/predis": "^2.2",
+        "resend/resend-laravel": "^1.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
