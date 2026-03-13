@@ -14,6 +14,7 @@
 .env
 .env.backup
 .env.production
+.deploy-credentials
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
