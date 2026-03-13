@@ -67,11 +67,16 @@
         </nav>
 
         {{-- Footer --}}
-        <div class="px-4 py-4" style="box-shadow:0 -1px 0 rgba(255,255,255,0.05)">
+        <div class="px-4 py-4 space-y-2" style="box-shadow:0 -1px 0 rgba(255,255,255,0.05)">
             <a href="{{ route('horizon.index') }}" target="_blank"
                class="flex items-center gap-2 text-xs text-d-muted hover:text-d-text transition-colors">
                 <span class="w-2 h-2 rounded-full bg-green-400"></span>
                 Laravel Horizon
+            </a>
+            <a href="/log-viewer" target="_blank"
+               class="flex items-center gap-2 text-xs text-d-muted hover:text-d-text transition-colors">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                Log Viewer
             </a>
         </div>
     </aside>

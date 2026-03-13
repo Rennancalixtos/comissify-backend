@@ -10,6 +10,7 @@
         "laravel/horizon": "^5.24",
         "laravel/sanctum": "^4.0",
         "livewire/livewire": "^3.5",
+        "opcodesio/log-viewer": "^3.23",
         "predis/predis": "^2.2"
     },
     "require-dev": {

@@ -12,7 +12,9 @@ class ProductSearch extends Component
 {
     public string  $keyword     = '';
     public ?int    $categoryId  = null;
-    public int     $sortType    = 2;  // default: mais vendidos
+    public int     $sortType    = 2;  // API sort param
+    public string  $sortField   = 'sales';
+    public string  $sortDir     = 'desc';
     public int     $page        = 1;
 
     public array   $products    = [];
@@ -94,22 +96,21 @@ class ProductSearch extends Component
         $this->doSearch(debit: false);
     }
 
-    public function sortBy(int $sortType): void
+    public function sortBy(string $field): void
     {
-        $this->sortType = $sortType;
+        if ($this->sortField === $field) {
+            $this->sortDir = $this->sortDir === 'desc' ? 'asc' : 'desc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDir   = 'desc';
+        }
 
         if (empty($this->products)) return;
 
-        // Sort locally — no new API call needed
+        $dir      = $this->sortDir === 'asc' ? 1 : -1;
         $products = $this->products;
 
-        usort($products, match ($sortType) {
-            2 => fn ($a, $b) => ($b['soldCount']      ?? 0) <=> ($a['soldCount']      ?? 0),
-            5 => fn ($a, $b) => ($b['commissionRate']  ?? 0) <=> ($a['commissionRate']  ?? 0),
-            4 => fn ($a, $b) => ($a['priceMin']        ?? 0) <=> ($b['priceMin']        ?? 0),
-            3 => fn ($a, $b) => ($b['priceMax']        ?? 0) <=> ($a['priceMax']        ?? 0),
-            default => fn () => 0,
-        });
+        usort($products, fn ($a, $b) => (($a[$field] ?? 0) <=> ($b[$field] ?? 0)) * $dir);
 
         $this->products = $products;
     }
@@ -281,6 +282,8 @@ class ProductSearch extends Component
             'searchCost'  => $this->searchCost,
             'linkCost'    => $this->linkCost,
             'balance'     => $user->tokenBalance(),
+            'sortField'   => $this->sortField,
+            'sortDir'     => $this->sortDir,
         ])->layout('layouts.app', ['title' => 'Busca de Produtos']);
     }
 }

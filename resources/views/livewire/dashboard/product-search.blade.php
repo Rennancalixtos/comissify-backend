@@ -1,4 +1,20 @@
-<div class="space-y-4">
+<div class="space-y-4"
+     x-data="{
+         confirmLink: false,
+         pendingLink: '',
+         pendingName: '',
+         pendingImage: '',
+         pendingPrice: '',
+         pendingCommission: '',
+         open(link, name, image, price, commission) {
+             this.pendingLink       = link;
+             this.pendingName       = name;
+             this.pendingImage      = image;
+             this.pendingPrice      = price;
+             this.pendingCommission = commission;
+             this.confirmLink       = true;
+         }
+     }">
 
     {{-- Filters --}}
     <div class="card !p-4">
@@ -56,59 +72,85 @@
     <div class="card !p-0 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
+                @php
+                    $sortIcon = function(string $field) use ($sortField, $sortDir): string {
+                        if ($sortField !== $field) return '<svg class="w-3 h-3 ml-1 opacity-30 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>';
+                        return $sortDir === 'asc'
+                            ? '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--color-primary)"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>'
+                            : '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--color-primary)"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>';
+                    };
+                    $thActive = 'style="color:var(--color-primary)"';
+                @endphp
                 <thead class="border-b border-d-border text-xs text-d-muted uppercase tracking-wider" style="background:#111111">
                     <tr>
-                        <th class="px-4 py-3 text-left w-8">
+                        <th class="hidden lg:table-cell px-4 py-3 text-left w-8">
                             <input type="checkbox" wire:click="toggleSelectAll"
                                    :checked="{{ json_encode($selectAll) }}"
                                    class="rounded border-d-border bg-d-input"/>
                         </th>
-                        <th class="px-4 py-3 text-left">#</th>
+                        <th class="hidden lg:table-cell px-4 py-3 text-left">#</th>
                         <th class="px-4 py-3 text-left">Produto</th>
-                        <th class="px-4 py-3 text-right cursor-pointer hover:text-d-text" wire:click="sortBy(2)">Vendidos</th>
-                        <th class="px-4 py-3 text-right cursor-pointer hover:text-d-text" wire:click="sortBy(5)">Ganho Afiliado</th>
-                        <th class="px-4 py-3 text-right cursor-pointer hover:text-d-text" wire:click="sortBy(4)">Preço Mín</th>
-                        <th class="px-4 py-3 text-right cursor-pointer hover:text-d-text" wire:click="sortBy(3)">Preço Máx</th>
-                        <th class="px-4 py-3 text-right">Taxa Com.</th>
-                        <th class="px-4 py-3 text-right">Desconto</th>
+                        <th class="hidden sm:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('sales')" {{ $sortField === 'sales' ? $thActive : '' }}>
+                            Vendidos {!! $sortIcon('sales') !!}
+                        </th>
+                        <th class="hidden sm:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('commission')" {{ $sortField === 'commission' ? $thActive : '' }}>
+                            Ganho {!! $sortIcon('commission') !!}
+                        </th>
+                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceMin')" {{ $sortField === 'priceMin' ? $thActive : '' }}>
+                            Preço Mín {!! $sortIcon('priceMin') !!}
+                        </th>
+                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceMax')" {{ $sortField === 'priceMax' ? $thActive : '' }}>
+                            Preço Máx {!! $sortIcon('priceMax') !!}
+                        </th>
+                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('commissionRate')" {{ $sortField === 'commissionRate' ? $thActive : '' }}>
+                            Taxa {!! $sortIcon('commissionRate') !!}
+                        </th>
+                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceDiscountRate')" {{ $sortField === 'priceDiscountRate' ? $thActive : '' }}>
+                            Desc. {!! $sortIcon('priceDiscountRate') !!}
+                        </th>
                         <th class="px-4 py-3 text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-d-border">
                     @foreach($products as $i => $product)
                     <tr class="transition-colors hover:bg-d-card2" wire:key="product-{{ $product['itemId'] }}">
-                        <td class="px-4 py-3">
+                        <td class="hidden lg:table-cell px-4 py-3">
                             <input type="checkbox"
                                    wire:click="toggleSelect('{{ $product['itemId'] }}')"
                                    @checked(in_array($product['itemId'], $selected))
                                    class="rounded border-d-border bg-d-input"/>
                         </td>
-                        <td class="px-4 py-3 text-d-muted">{{ $i + 1 }}</td>
+                        <td class="hidden lg:table-cell px-4 py-3 text-d-muted">{{ $i + 1 }}</td>
                         <td class="px-4 py-3">
-                            <div class="flex items-center gap-3 max-w-xs">
+                            <div class="flex items-center gap-3">
                                 <img src="{{ $product['imageUrl'] ?? '' }}" alt=""
                                      class="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-d-input"
                                      onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' rx=\'8\' fill=\'%231A1A1A\'/%3E%3Cpath d=\'M12 28l6-8 4 5 3-4 5 7H12z\' fill=\'%23333\'/%3E%3Ccircle cx=\'27\' cy=\'15\' r=\'3\' fill=\'%23333\'/%3E%3C/svg%3E'"/>
                                 <div class="min-w-0">
                                     <p class="font-medium text-d-text truncate">{{ $product['productName'] }}</p>
                                     <p class="text-xs text-d-muted truncate">{{ $product['shopName'] ?? '' }}</p>
+                                    {{-- Mobile: mostra ganho e vendidos inline --}}
+                                    <div class="flex items-center gap-2 mt-0.5 sm:hidden">
+                                        <span class="text-xs font-semibold text-green-400">R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}</span>
+                                        <span class="text-xs text-d-muted">· {{ number_format($product['sales'] ?? 0) }} vendidos</span>
+                                    </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-right text-d-muted">{{ number_format($product['sales'] ?? 0) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-green-400">
+                        <td class="hidden sm:table-cell px-4 py-3 text-right text-d-muted">{{ number_format($product['sales'] ?? 0) }}</td>
+                        <td class="hidden sm:table-cell px-4 py-3 text-right font-semibold text-green-400">
                             R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}
                         </td>
-                        <td class="px-4 py-3 text-right text-d-text">
-                            R$ {{ number_format(($product['priceMin'] ?? 0) / 100000, 2, ',', '.') }}
+                        <td class="hidden lg:table-cell px-4 py-3 text-right text-d-text">
+                            R$ {{ number_format($product['priceMin'] ?? 0, 2, ',', '.') }}
                         </td>
-                        <td class="px-4 py-3 text-right text-d-text">
-                            R$ {{ number_format(($product['priceMax'] ?? 0) / 100000, 2, ',', '.') }}
+                        <td class="hidden lg:table-cell px-4 py-3 text-right text-d-text">
+                            R$ {{ number_format($product['priceMax'] ?? 0, 2, ',', '.') }}
                         </td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="hidden lg:table-cell px-4 py-3 text-right">
                             <span class="badge-green">{{ $product['commissionRate'] ?? 0 }}%</span>
                         </td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="hidden lg:table-cell px-4 py-3 text-right">
                             @if(!empty($product['priceDiscountRate']))
                             <span class="badge-primary">-{{ $product['priceDiscountRate'] }}%</span>
                             @else
@@ -123,7 +165,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </button>
-                                <button wire:click="generateLink('{{ $product['offerLink'] ?? $product['productLink'] }}', '{{ addslashes($product['productName']) }}')"
+                                <button @click="open('{{ addslashes($product['offerLink'] ?? $product['productLink']) }}', '{{ addslashes($product['productName']) }}', '{{ $product['imageUrl'] ?? '' }}', 'R$ {{ number_format($product['priceMin'] ?? 0, 2, ',', '.') }}', 'R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}')"
                                         class="p-1.5 rounded-lg hover:bg-d-input transition-colors" title="Gerar link"
                                         style="color:var(--color-primary)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,6 +224,14 @@
                 </button>
             </div>
             <p class="text-xs text-d-muted mt-3">R$ {{ number_format($linkCost, 2, ',', '.') }} deduzido do seu saldo</p>
+            <div class="mt-4 pt-4 border-t border-d-border flex items-center justify-between">
+                <p class="text-xs text-d-muted">
+                    <span class="text-green-400">✓</span> Produto salvo no <strong class="text-d-text">Criador</strong>
+                </p>
+                <a href="{{ route('posts') }}" class="text-xs font-semibold transition-colors" style="color:var(--color-primary)">
+                    Ver no Criador →
+                </a>
+            </div>
         </div>
     </div>
     @endif
@@ -239,7 +289,7 @@
             <h4 class="font-semibold text-d-text mb-3">{{ $detailProduct['productName'] }}</h4>
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between"><dt class="text-d-muted">Loja</dt><dd class="font-medium text-d-text">{{ $detailProduct['shopName'] ?? '—' }}</dd></div>
-                <div class="flex justify-between"><dt class="text-d-muted">Preço</dt><dd class="font-medium text-d-text">R$ {{ number_format(($detailProduct['priceMin'] ?? 0) / 100000, 2, ',', '.') }} – R$ {{ number_format(($detailProduct['priceMax'] ?? 0) / 100000, 2, ',', '.') }}</dd></div>
+                <div class="flex justify-between"><dt class="text-d-muted">Preço</dt><dd class="font-medium text-d-text">R$ {{ number_format($detailProduct['priceMin'] ?? 0, 2, ',', '.') }} – R$ {{ number_format($detailProduct['priceMax'] ?? 0, 2, ',', '.') }}</dd></div>
                 <div class="flex justify-between"><dt class="text-d-muted">Vendidos</dt><dd class="font-medium text-d-text">{{ number_format($detailProduct['sales'] ?? 0) }}</dd></div>
                 <div class="flex justify-between"><dt class="text-d-muted">Avaliação</dt><dd class="font-medium text-d-text">{{ $detailProduct['ratingStar'] ?? '—' }} ★</dd></div>
                 <div class="flex justify-between"><dt class="text-d-muted">Taxa comissão</dt><dd class="font-semibold text-green-400">{{ $detailProduct['commissionRate'] ?? 0 }}%</dd></div>
@@ -252,5 +302,54 @@
         </div>
     </div>
     @endif
+
+    {{-- Modal: confirmação de geração de link --}}
+    <div x-show="confirmLink" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+         @keydown.escape.window="confirmLink = false">
+        <div class="card w-full max-w-sm" @click.stop>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-d-text">Gerar link afiliado</h3>
+                <button @click="confirmLink = false" class="text-d-muted hover:text-d-text text-xl leading-none">✕</button>
+            </div>
+
+            {{-- Produto --}}
+            <div class="flex items-center gap-3 p-3 rounded-xl mb-4" style="background:#111111">
+                <img :src="pendingImage" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-d-input"
+                     onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect width=\'48\' height=\'48\' rx=\'8\' fill=\'%231A1A1A\'/%3E%3C/svg%3E'"/>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-d-text truncate" x-text="pendingName"></p>
+                    <p class="text-xs text-d-muted mt-0.5" x-text="pendingPrice"></p>
+                </div>
+            </div>
+
+            {{-- Info --}}
+            <div class="space-y-2 mb-5">
+                <div class="flex justify-between text-sm">
+                    <span class="text-d-muted">Ganho estimado</span>
+                    <span class="font-semibold text-green-400" x-text="pendingCommission"></span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-d-muted">Custo da operação</span>
+                    <span class="font-semibold text-d-text">R$ {{ number_format($linkCost, 2, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <p class="text-xs text-d-muted mb-4">
+                Será gerado um link de afiliado curto e o produto ficará disponível no <strong class="text-d-text">Criador</strong> para geração de conteúdo.
+            </p>
+
+            <div class="flex gap-2">
+                <button @click="confirmLink = false"
+                        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-d-muted border border-d-border hover:bg-d-input transition-colors">
+                    Cancelar
+                </button>
+                <button @click="confirmLink = false; $wire.generateLink(pendingLink, pendingName)"
+                        class="flex-1 btn-primary justify-center py-2.5 text-sm">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
 
 </div>

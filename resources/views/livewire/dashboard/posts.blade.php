@@ -1,7 +1,7 @@
-<div class="flex gap-5 h-full" x-data>
+<div class="flex flex-col md:flex-row gap-5" x-data>
 
     {{-- ── COLUNA ESQUERDA: lista de produtos afiliados ────────────────────── --}}
-    <div class="w-72 flex-shrink-0 space-y-3">
+    <div class="w-full md:w-72 md:flex-shrink-0 space-y-3">
         <p class="text-xs font-semibold text-d-muted uppercase tracking-wider px-1">Meus Produtos</p>
 
         @if($this->links->isEmpty())
@@ -185,41 +185,82 @@
         @endif
 
         {{-- ── Resultado Pinterest (pins) ──────────────────────────────── --}}
+        @once
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        @endonce
         @if(! empty($pinterestPins))
         <div class="card !p-0 overflow-hidden">
             <div class="px-4 py-3 border-b border-d-border">
                 <p class="text-sm font-semibold text-d-text">Resultados — {{ count($pinterestPins) }} pins</p>
             </div>
-            <div class="grid grid-cols-3 gap-px" style="background:rgba(255,255,255,0.04)">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-px" style="background:rgba(255,255,255,0.04)">
                 @foreach($pinterestPins as $pin)
-                <div class="relative group" style="background:#1C1C1C">
-                    <div class="aspect-square overflow-hidden">
-                        <img src="{{ $pin['image_url'] }}" alt="{{ $pin['title'] }}"
-                             class="w-full h-full object-cover group-hover:opacity-80 transition-opacity">
+                @php
+                    $isVideo = $pin['media_type'] === 'video' && $pin['video_url'];
+                    $dlAsset = $pin['video_url'] ?? $pin['image_url'];
+                    $dlUrl   = $dlAsset ? route('download.proxy', ['url' => $dlAsset]) : null;
+                    $dlLabel = $isVideo ? 'Baixar MP4' : 'Baixar img';
+                @endphp
+                <div class="relative group" style="background:#1C1C1C"
+                     x-data="{ playing: false,
+                                play() {
+                                    this.playing = true;
+                                    let v = this.$refs.vid;
+                                    if (window.Hls && Hls.isSupported()) {
+                                        let h = new Hls(); h.loadSource(v.dataset.src); h.attachMedia(v); v.play();
+                                    } else { v.src = v.dataset.src; v.play(); }
+                                },
+                                stop() { this.playing = false; this.$refs.vid.pause(); }
+                              }">
+                    <div class="aspect-square overflow-hidden relative">
+                        {{-- Thumbnail --}}
+                        <img x-show="!playing" src="{{ $pin['image_url'] }}" alt="{{ $pin['title'] }}"
+                             class="w-full h-full object-cover transition-opacity"
+                             :class="!playing ? 'group-hover:opacity-70' : ''">
+                        {{-- Video player (sempre no DOM para x-ref funcionar) --}}
+                        @if($isVideo)
+                        <video x-ref="vid" x-show="playing"
+                               class="w-full h-full object-cover bg-black"
+                               data-src="{{ $pin['video_url'] }}"
+                               controls playsinline
+                               @click.stop>
+                        </video>
+                        {{-- Botão play central --}}
+                        <button x-show="!playing" @click.stop="play()"
+                                class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+                                 style="background:rgba(0,0,0,0.65)">
+                                <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </button>
+                        {{-- Botão fechar quando tocando --}}
+                        <button x-show="playing" @click.stop="stop()"
+                                class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center z-10"
+                                style="background:rgba(0,0,0,0.7)">
+                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        @endif
                     </div>
-                    @if($pin['media_type'] === 'video')
-                    <div class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-xs font-bold text-white"
-                         style="background:rgba(0,0,0,0.7)">▶ Vídeo</div>
-                    @endif
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity p-2"
+
+                    {{-- Hover overlay com botões (some quando tocando) --}}
+                    <div x-show="!playing"
+                         class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity p-2 pointer-events-none"
                          style="background:linear-gradient(to top, rgba(0,0,0,0.8), transparent)">
-                        <div class="w-full flex gap-1.5">
+                        <div class="w-full flex gap-1.5 pointer-events-auto">
                             <a href="{{ $pin['link'] ?? '#' }}" target="_blank" rel="noopener"
                                class="flex-1 text-center text-xs font-medium text-white py-1 rounded"
                                style="background:rgba(255,255,255,0.15)">
                                 Abrir
                             </a>
-                            @if($pin['video_url'] ?? null)
-                            <a href="{{ $pin['video_url'] }}" download
+                            @if($dlUrl)
+                            <a href="{{ $dlUrl }}"
                                class="flex-1 text-center text-xs font-medium text-white py-1 rounded"
                                style="background:var(--color-primary)">
-                                Baixar
-                            </a>
-                            @else
-                            <a href="{{ $pin['image_url'] }}" download
-                               class="flex-1 text-center text-xs font-medium text-white py-1 rounded"
-                               style="background:var(--color-primary)">
-                                Baixar
+                                {{ $dlLabel }}
                             </a>
                             @endif
                         </div>

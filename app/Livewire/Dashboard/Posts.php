@@ -167,7 +167,7 @@ class Posts extends Component
             'type'              => 'pinterest',
             'status'            => 'completed',
             'credits_charged'   => $cost,
-            'result'            => ['pins' => $result['pins'], 'query' => $this->pinterestQuery],
+            'result'            => ['pins' => $result['pins'], 'query' => $this->pinterestQuery, 'cursor' => $result['cursor'] ?? null],
         ]);
 
         $this->pinterestPins = $result['pins'];
@@ -200,6 +200,6 @@ class Posts extends Component
     public function render()
     {
         return view('livewire.dashboard.posts')
-            ->layout('layouts.app', ['title' => 'Posts']);
+            ->layout('layouts.app', ['title' => 'Criador']);
     }
 }

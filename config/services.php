@@ -15,6 +15,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'pinterest' => [
+        'scraper_key' => env('PINTEREST_SCRAPER_KEY'),
+    ],
+
     'shopee' => [
         'app_id'       => env('SHOPEE_APP_ID'),
         'secret'       => env('SHOPEE_SECRET'),
