@@ -85,17 +85,13 @@ class Register extends Component
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        if (env('SHOPEE_MOCK', false)) {
+        if (app()->isLocal() && env('SHOPEE_MOCK', false)) {
             session()->flash('otp_dev', "DEV — código OTP: {$code}");
         } else {
-            try {
-                Mail::raw(
-                    "Seu código de verificação Comissify: {$code}\n\nExpira em 15 minutos.",
-                    fn ($m) => $m->to($user->email)->subject('Verificação de e-mail — Comissify')
-                );
-            } catch (\Throwable) {
-                session()->flash('otp_dev', "Email falhou. DEV — código OTP: {$code}");
-            }
+            Mail::raw(
+                "Seu código de verificação Comissify: {$code}\n\nExpira em 15 minutos.",
+                fn ($m) => $m->to($user->email)->subject('Verificação de e-mail — Comissify')
+            );
         }
 
         $this->canResend = false;

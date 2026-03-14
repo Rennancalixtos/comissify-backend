@@ -35,7 +35,7 @@
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mb-6"
                  style="border-color:color-mix(in srgb,var(--color-primary) 40%,transparent);background:color-mix(in srgb,var(--color-primary) 10%,transparent);color:var(--color-primary)">
-                ⚡ Automação para afiliados Shopee
+                Automação para afiliados Shopee
             </div>
             <h1 class="text-5xl font-bold text-d-text mb-6 leading-tight">
                 Automatize.<br>
