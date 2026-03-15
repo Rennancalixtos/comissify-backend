@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     nodejs \
     npm \
+    nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install yt-dlp
@@ -52,10 +54,24 @@ WORKDIR /var/www
 
 COPY . .
 
+RUN mkdir -p bootstrap/cache storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
+    && chmod -R 775 bootstrap/cache storage
+
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN npm ci && npm run build
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# Nginx config
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/sites-enabled/default
+
+# Supervisor config
+COPY docker/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+
+# Entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 80
+CMD ["/usr/local/bin/entrypoint.sh"]
