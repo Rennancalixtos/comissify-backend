@@ -35,7 +35,7 @@
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mb-6"
                  style="border-color:color-mix(in srgb,var(--color-primary) 40%,transparent);background:color-mix(in srgb,var(--color-primary) 10%,transparent);color:var(--color-primary)">
-                ⚡ Automação para afiliados Shopee
+                Automação para afiliados Shopee
             </div>
             <h1 class="text-5xl font-bold text-d-text mb-6 leading-tight">
                 Automatize.<br>
@@ -221,7 +221,7 @@
                 <a href="{{ route('register') }}"
                    class="btn-primary w-full justify-center !py-2.5"
                    style="{{ $pkg->is_featured ? '' : 'background:var(--color-primary-dark)' }}">
-                    Escolher plano
+                    Escolher pacote
                 </a>
             </div>
             @endforeach
@@ -236,7 +236,7 @@
         <h2 class="text-3xl font-bold text-d-text text-center mb-12">Perguntas frequentes</h2>
         <div class="space-y-3" x-data="{ open: null }">
             @foreach([
-                ['q' => 'O que são créditos?', 'a' => 'Créditos são o saldo da sua conta, usado para realizar buscas de produtos e gerar links afiliados. Cada busca consome R$ 0,20 em créditos, garantindo uso justo da plataforma.'],
+                ['q' => 'O que são créditos?', 'a' => 'Créditos são o saldo da sua conta, usado para realizar buscas de produtos e gerar links afiliados. Cada busca consome R$ 0,02 em créditos, garantindo uso justo da plataforma.'],
                 ['q' => 'Preciso ser aprovado no programa de afiliados da Shopee?', 'a' => 'Sim. Para usar o Comissify, você precisa já participar do Programa de Afiliados Shopee e ter solicitado a liberação de acesso à API diretamente no app da Shopee. Sem essa aprovação, não é possível conectar.'],
                 ['q' => 'Como conecto minha conta Shopee?', 'a' => 'Após criar sua conta no Comissify, você será direcionado para uma tela de conexão onde inserirá seu App ID e sua Chave de acesso (fornecidos pela Shopee ao liberar a API). A validação é feita automaticamente.'],
                 ['q' => 'Como funciona a cobrança?', 'a' => 'Você compra pacotes de créditos e usa conforme necessário. Não há assinatura mensal — você paga apenas o que usar.'],

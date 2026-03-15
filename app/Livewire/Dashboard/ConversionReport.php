@@ -11,7 +11,7 @@ class ConversionReport extends Component
     public string $period = '30';   // days: 7, 30, 90, or 'custom'
     public string $dateStart = '';
     public string $dateEnd   = '';
-    public string $orderStatus = '';
+    public string $orderStatus = 'ALL';
 
     public array  $nodes    = [];
     public array  $pageInfo = [];
@@ -104,9 +104,9 @@ class ConversionReport extends Component
         [$start, $end] = $this->resolveDateRange();
 
         $params = array_filter([
-            'purchaseTimeStart' => $start,
-            'purchaseTimeEnd'   => $end,
-            'orderStatus'       => $this->orderStatus ?: null,
+            'purchaseTimeStart' => $start ? (string) $start : null,
+            'purchaseTimeEnd'   => $end   ? (string) $end   : null,
+            'orderStatus'       => $this->orderStatus ?: 'ALL',
             'limit'             => 50,
             'scrollId'          => $this->scrollId,
         ], fn ($v) => $v !== null);

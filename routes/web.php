@@ -30,6 +30,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/creditos',  \App\Livewire\Dashboard\Credits::class)->name('credits');
 });
 
+// ─── Pagamentos (Mercado Pago) ────────────────────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::post('/checkout/create',    [\App\Http\Controllers\PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/checkout/success',    [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/checkout/failure',    [\App\Http\Controllers\PaymentController::class, 'failure'])->name('payment.failure');
+    Route::get('/checkout/pending',    [\App\Http\Controllers\PaymentController::class, 'pending'])->name('payment.pending');
+});
+
+// Webhook do MP — sem auth, sem CSRF (exceção configurada em bootstrap/app.php)
+Route::post('/webhook/mercadopago', [\App\Http\Controllers\MercadoPagoWebhookController::class, 'handle'])
+    ->name('payment.webhook');
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 

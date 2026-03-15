@@ -53,7 +53,7 @@
             <div>
                 <label class="block text-xs text-d-muted mb-1.5">Status</label>
                 <select wire:model.live="orderStatus" class="form-input !py-1.5 text-sm">
-                    <option value="">Todos</option>
+                    <option value="ALL">Todos</option>
                     <option value="COMPLETED">Concluído</option>
                     <option value="PENDING">Pendente</option>
                     <option value="CANCELLED">Cancelado</option>
