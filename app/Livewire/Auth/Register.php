@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Auth;
 
-use App\Models\EmailVerification;
 use App\Models\User;
-use App\Models\UserPaymentMethod;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
@@ -17,6 +17,7 @@ class Register extends Component
     // Step 1
     public string $name     = '';
     public string $email    = '';
+    public string $phone    = '';
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -27,70 +28,65 @@ class Register extends Component
     public ?string $otpError = null;
     public bool $canResend = false;
 
-    // Step 3 — Payment
-    public string $cardNumber = '';
-    public string $cardName   = '';
-    public string $cardExpiry = '';
-    public string $cardCvv    = '';
-
-    public ?int $userId = null;
-
     public function rules(): array
     {
         return match ($this->step) {
             1 => [
                 'name'                  => 'required|string|max:100',
                 'email'                 => 'required|email|unique:users,email',
+                'phone'                 => 'required|string|min:10|max:20|unique:users,phone',
                 'password'              => 'required|min:8|confirmed',
                 'password_confirmation' => 'required',
-            ],
-            3 => [
-                'cardNumber' => 'required|min:16',
-                'cardName'   => 'required|string|max:100',
-                'cardExpiry' => ['required', 'regex:/^\d{2}\/\d{2}$/'],
-                'cardCvv'    => 'required|digits_between:3,4',
             ],
             default => [],
         };
     }
 
+    private function isDisposableEmail(string $email): bool
+    {
+        try {
+            $response = Http::timeout(5)
+                ->get("https://open.kickbox.com/v1/disposable/{$email}");
+
+            return $response->successful() && $response->json('disposable') === true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
 
     public function submitStep1(): void
     {
         $this->validate($this->rules());
 
-        $user = User::create([
-            'name'              => $this->name,
-            'email'             => $this->email,
-            'password'          => Hash::make($this->password),
-            'is_admin'          => false,
-            'is_active'         => true,
-            'email_verified_at' => null,
-        ]);
-        $user->ensureTokenWallet();
+        if ($this->isDisposableEmail($this->email)) {
+            $this->addError('email', 'E-mails temporários não são permitidos. Use um e-mail real.');
+            return;
+        }
 
-        $this->userId = $user->id;
-        $this->sendOtp($user);
+        // Salvar dados em cache — nenhum registro no banco ainda
+        Cache::put("register_data:{$this->email}", [
+            'name'     => $this->name,
+            'email'    => $this->email,
+            'phone'    => preg_replace('/\D/', '', $this->phone),
+            'password' => Hash::make($this->password),
+        ], now()->addMinutes(30));
+
+        $this->sendOtp($this->email);
         $this->step = 2;
     }
 
-    private function sendOtp(User $user): void
+    private function sendOtp(string $email): void
     {
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        EmailVerification::where('user_id', $user->id)->delete();
-        EmailVerification::create([
-            'user_id'    => $user->id,
-            'code_hash'  => Hash::make($code),
-            'expires_at' => now()->addMinutes(15),
-        ]);
+        Cache::put("register_otp:{$email}", Hash::make($code), now()->addMinutes(15));
 
         if (app()->isLocal() && env('SHOPEE_MOCK', false)) {
             session()->flash('otp_dev', "DEV — código OTP: {$code}");
         } else {
             Mail::raw(
                 "Seu código de verificação Comissify: {$code}\n\nExpira em 15 minutos.",
-                fn ($m) => $m->to($user->email)->subject('Verificação de e-mail — Comissify')
+                fn ($m) => $m->to($email)->subject('Verificação de e-mail — Comissify')
             );
         }
 
@@ -99,72 +95,50 @@ class Register extends Component
 
     public function resendOtp(): void
     {
-        if (!$this->canResend || !$this->userId) return;
-        $user = User::find($this->userId);
-        if ($user) $this->sendOtp($user);
+        if (!$this->canResend) return;
+        $this->sendOtp($this->email);
     }
-
 
     public function submitStep2(): void
     {
         $code = $this->otp1.$this->otp2.$this->otp3.$this->otp4.$this->otp5.$this->otp6;
-        $verification = EmailVerification::where('user_id', $this->userId)->latest()->first();
 
-        if (!$verification || $verification->isExpired()) {
+        $codeHash = Cache::get("register_otp:{$this->email}");
+
+        if (!$codeHash) {
             $this->otpError = 'Código expirado. Reenvie um novo código.';
             return;
         }
-        if (!Hash::check($code, $verification->code_hash)) {
+
+        if (!Hash::check($code, $codeHash)) {
             $this->otpError = 'Código incorreto. Verifique e tente novamente.';
             return;
         }
 
-        $this->otpError = null;
-        $user = User::findOrFail($this->userId);
-        $user->update(['email_verified_at' => now()]);
-        $verification->delete();
+        $data = Cache::get("register_data:{$this->email}");
 
-        $bonus = (float) env('NEW_USER_TOKEN_BONUS', 0);
-        if ($bonus > 0) {
-            $user->ensureTokenWallet()->credit($bonus, 'Bônus de boas-vindas');
+        if (!$data) {
+            $this->otpError = 'Sessão expirada. Reinicie o cadastro.';
+            $this->step = 1;
+            return;
         }
 
-        $this->step = 3;
-    }
-
-
-    public function submitStep3(): void
-    {
-        $this->validate($this->rules());
-
-        $number = preg_replace('/\D/', '', $this->cardNumber);
-        $brand  = match (true) {
-            str_starts_with($number, '4') => 'Visa',
-            str_starts_with($number, '5') => 'Mastercard',
-            str_starts_with($number, '6') => 'Elo',
-            default                       => 'Outro',
-        };
-
-        UserPaymentMethod::create([
-            'user_id'          => $this->userId,
-            'card_last_four'   => substr($number, -4),
-            'card_brand'       => $brand,
-            'card_holder_name' => $this->cardName,
-            'card_expiry'      => $this->cardExpiry,
-            'is_default'       => true,
+        // Só agora criamos o usuário no banco
+        $user = User::create([
+            'name'              => $data['name'],
+            'email'             => $data['email'],
+            'phone'             => $data['phone'],
+            'password'          => $data['password'],
+            'is_admin'          => false,
+            'is_active'         => true,
+            'email_verified_at' => now(),
         ]);
+        $user->ensureTokenWallet();
 
-        $this->finishRegistration();
-    }
+        Cache::forget("register_otp:{$this->email}");
+        Cache::forget("register_data:{$this->email}");
 
-    public function skipStep3(): void
-    {
-        $this->finishRegistration();
-    }
-
-    private function finishRegistration(): void
-    {
-        Auth::loginUsingId($this->userId);
+        Auth::login($user);
         $this->redirect(route('connect'));
     }
 

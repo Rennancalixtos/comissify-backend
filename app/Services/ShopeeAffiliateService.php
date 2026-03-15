@@ -94,7 +94,7 @@ class ShopeeAffiliateService
             ], fn ($v) => $v !== null);
         }
 
-        $response = $this->request($cred, $query, $variables);
+        $response = $this->request($cred, $query, $variables, 'Busca de Produtos');
 
         if (isset($response['error'])) {
             return ['nodes' => [], 'pageInfo' => [], 'error' => $response['error']];
@@ -126,7 +126,7 @@ class ShopeeAffiliateService
             'subIds'    => $subIds ?: null,
         ]);
 
-        $response = $this->request($cred, $mutation, $variables);
+        $response = $this->request($cred, $mutation, $variables, 'Geração de Link');
 
         if (isset($response['error'])) {
             throw new \RuntimeException($response['error']);
@@ -137,42 +137,71 @@ class ShopeeAffiliateService
 
     public function getConversionReport(UserCredential $cred, array $params = []): array
     {
-        $query = <<<'GQL'
-        query GetConversionReport(
-            $purchaseTimeStart: Int
-            $purchaseTimeEnd: Int
-            $orderStatus: String
-            $limit: Int
-            $scrollId: String
-        ) {
+        // Enum/Int64 como literais inline para evitar erros de tipo nas variáveis GraphQL
+        $args  = '';
+        $args .= !empty($params['purchaseTimeStart']) ? "\n                purchaseTimeStart: {$params['purchaseTimeStart']}" : '';
+        $args .= !empty($params['purchaseTimeEnd'])   ? "\n                purchaseTimeEnd: {$params['purchaseTimeEnd']}"   : '';
+        $args .= !empty($params['scrollId'])          ? "\n                scrollId: \"{$params['scrollId']}\""            : '';
+
+        $orderStatus = $params['orderStatus'] ?? 'ALL';
+        $limit       = (int) ($params['limit'] ?? 50);
+
+        $query = <<<GQL
+        {
             conversionReport(
-                purchaseTimeStart: $purchaseTimeStart
-                purchaseTimeEnd: $purchaseTimeEnd
-                orderStatus: $orderStatus
-                limit: $limit
-                scrollId: $scrollId
+                orderStatus: {$orderStatus}
+                limit: {$limit}{$args}
             ) {
                 nodes {
+                    clickTime
                     purchaseTime
                     conversionId
+                    shopeeCommissionCapped
+                    sellerCommission
                     totalCommission
                     netCommission
+                    mcnManagementFeeRate
+                    mcnManagementFee
+                    mcnContractId
+                    linkedMcnName
                     buyerType
                     utmContent
                     device
+                    productType
+                    referrer
                     orders {
                         orderId
+                        shopType
                         orderStatus
                         items {
+                            shopId
                             shopName
+                            completeTime
+                            promotionId
+                            modelId
+                            itemId
                             itemName
                             itemPrice
+                            displayItemStatus
                             actualAmount
+                            refundAmount
                             qty
                             imageUrl
                             itemTotalCommission
-                            displayItemStatus
+                            itemSellerCommission
+                            itemSellerCommissionRate
+                            itemShopeeCommissionCapped
+                            itemShopeeCommissionRate
+                            itemNotes
+                            globalCategoryLv1Name
+                            globalCategoryLv2Name
+                            globalCategoryLv3Name
                             fraudStatus
+                            fraudReason
+                            attributionType
+                            channelType
+                            campaignPartnerName
+                            campaignType
                         }
                     }
                 }
@@ -187,13 +216,19 @@ class ShopeeAffiliateService
 
         $variables = array_filter([
             'purchaseTimeStart' => $params['purchaseTimeStart'] ?? null,
-            'purchaseTimeEnd'   => $params['purchaseTimeEnd'] ?? null,
-            'orderStatus'       => $params['orderStatus'] ?? null,
-            'limit'             => (int) ($params['limit'] ?? 50),
-            'scrollId'          => $params['scrollId'] ?? null,
+            'purchaseTimeEnd'   => $params['purchaseTimeEnd']   ?? null,
+            'conversionStatus'  => $params['conversionStatus']  ?? null,
+            'categoryType'      => $params['categoryType']      ?? null,
+            'orderStatus'       => $params['orderStatus']       ?? null,
+            'buyerType'         => $params['buyerType']         ?? null,
+            'productType'       => $params['productType']       ?? null,
+            'fraudStatus'       => $params['fraudStatus']       ?? null,
+            'device'            => $params['device']            ?? null,
+            'limit'             => (int) ($params['limit']      ?? 50),
+            'scrollId'          => $params['scrollId']          ?? null,
         ], fn ($v) => $v !== null);
 
-        $response = $this->request($cred, $query, $variables);
+        $response = $this->request($cred, $query, $variables, 'Relatório');
 
         if (isset($response['error'])) {
             return ['nodes' => [], 'pageInfo' => [], 'error' => $response['error']];
@@ -239,11 +274,13 @@ class ShopeeAffiliateService
     }
 
 
-    private function request(UserCredential $cred, string $query, array $variables = []): array
+    private function request(UserCredential $cred, string $query, array $variables = [], string $action = 'Request'): array
     {
         $appId   = $cred->app_id;
         $secret  = $cred->app_secret;
         $payload = json_encode(['query' => $query, 'variables' => $variables]);
+
+        Log::debug("{$action} Shopee API request [user:{$cred->user_id}]", ['payload' => $payload]);
 
         try {
             $response = Http::timeout(30)
@@ -256,6 +293,8 @@ class ShopeeAffiliateService
 
             $body = $response->json();
 
+            Log::debug("{$action} Shopee API response [user:{$cred->user_id}]", ['body' => $body]);
+
             // GraphQL errors
             if (!empty($body['errors'])) {
                 $err  = $body['errors'][0];
@@ -265,7 +304,7 @@ class ShopeeAffiliateService
 
             return $body;
         } catch (\Throwable $e) {
-            Log::error('ShopeeAffiliateService request failed', ['message' => $e->getMessage()]);
+            Log::error("{$action} Shopee API request failed [user:{$cred->user_id}]", ['message' => $e->getMessage()]);
             return ['error' => 'Falha na conexão com a API Shopee.'];
         }
     }

@@ -1,4 +1,23 @@
+@push('scripts')
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+@endpush
+
 <div class="space-y-6">
+
+    {{-- ── Flash messages ──────────────────────────────────────────────────── --}}
+    @if(session('success'))
+    <div class="rounded-lg px-4 py-3 text-sm" style="background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)">
+        {{ session('success') }}
+    </div>
+    @elseif(session('error'))
+    <div class="rounded-lg px-4 py-3 text-sm" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)">
+        {{ session('error') }}
+    </div>
+    @elseif(session('info'))
+    <div class="rounded-lg px-4 py-3 text-sm" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)">
+        {{ session('info') }}
+    </div>
+    @endif
 
     {{-- ── Saldo atual ──────────────────────────────────────────────────────── --}}
     <div class="card flex items-center justify-between">
@@ -55,22 +74,39 @@
                     @endif
                 </div>
 
-                @if($whatsapp)
-                <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}?text={{ urlencode('Olá! Quero adquirir o pacote ' . $pkg->name . ' (R$ ' . number_format($pkg->price, 2, ',', '.') . ').') }}"
-                   target="_blank" rel="noopener"
-                   class="btn-primary w-full justify-center !py-2.5 text-sm flex items-center gap-2"
-                   style="{{ $pkg->is_featured ? '' : 'background:var(--color-primary-dark,var(--color-primary))' }}">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                <button
+                    x-data="{ loading: false }"
+                    @click="
+                        loading = true;
+                        fetch('{{ route('payment.create') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                            },
+                            body: JSON.stringify({ package_id: {{ $pkg->id }} })
+                        })
+                        .then(r => { console.log('MP status:', r.status); return r.text(); })
+                        .then(text => {
+                            console.log('MP response:', text);
+                            const data = JSON.parse(text);
+                            const mp = new MercadoPago('{{ config('services.mercadopago.public_key') }}', { locale: 'pt-BR' });
+                            mp.checkout({ preference: { id: data.preference_id }, autoOpen: true });
+                        })
+                        .catch(e => { loading = false; console.error('MP error:', e); alert('Erro ao iniciar pagamento. Tente novamente.'); })
+                    "
+                    :disabled="loading"
+                    class="btn-primary w-full justify-center !py-2.5 text-sm flex items-center gap-2 disabled:opacity-60"
+                    style="{{ $pkg->is_featured ? '' : 'background:var(--color-primary-dark,var(--color-primary))' }}">
+                    <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
                     </svg>
-                    Solicitar via WhatsApp
-                </a>
-                @else
-                <div class="rounded-lg px-3 py-2.5 text-xs text-d-muted text-center"
-                     style="background:#1A1A1A;border:1px solid #2E2E2E">
-                    Entre em contato com o suporte para adquirir este pacote.
-                </div>
-                @endif
+                    <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    <span x-text="loading ? 'Aguarde...' : 'Comprar agora'"></span>
+                </button>
             </div>
             @endforeach
         </div>

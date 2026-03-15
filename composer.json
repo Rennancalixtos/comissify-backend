@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.11",
         "livewire/livewire": "^3.5",
+        "mercadopago/dx-php": "^3.8",
         "opcodesio/log-viewer": "^3.23",
         "predis/predis": "^2.2"
     },

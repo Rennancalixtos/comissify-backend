@@ -1,16 +1,108 @@
 <!DOCTYPE html>
-<html lang="pt-BR" x-data>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conectar Shopee — Comissify</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireScripts
     <style>{!! \App\Services\ThemeService::cssVars() !!}</style>
 </head>
 <body class="bg-d-bg min-h-screen flex items-center justify-center p-4">
 
-<div class="w-full max-w-lg">
+<div class="w-full max-w-lg"
+     x-data="{
+        guide: false,
+        current: 0,
+        steps: [
+            { img: '/images/connect-guide/1.jpeg',  caption: 'Abra o app da Shopee e toque no ícone de perfil (Eu) na barra inferior da tela.' },
+            { img: '/images/connect-guide/2.jpeg',  caption: 'Role a tela para baixo até encontrar Criadores e Afiliados e toque nessa opção.' },
+            { img: '/images/connect-guide/3.jpeg',  caption: 'Você já está na área de afiliados. Toque na aba Conta no canto inferior direito.' },
+            { img: '/images/connect-guide/4.jpg',   caption: 'Na tela Conta, toque no ícone de engrenagem no canto superior direito para abrir as configurações.' },
+            { img: '/images/connect-guide/5.jpeg',  caption: 'Toque em Configurações da Conta para ver os detalhes da sua conta de afiliado.' },
+            { img: '/images/connect-guide/6.jpeg',  caption: 'Localize o campo ID de Afiliado e copie o número exibido — você vai precisar dele mais adiante.' },
+            { img: '/images/connect-guide/7.jpg',   caption: 'Volte para a tela Conta e toque em Central de Ajuda para solicitar a ativação da API.' },
+            { img: '/images/connect-guide/8.jpeg',  caption: 'Role até o final da página da Central de Ajuda para encontrar a seção de Acesso Rápido.' },
+            { img: '/images/connect-guide/9.jpeg',  caption: 'Em Acesso Rápido, toque em E-mail para abrir o formulário de solicitação.' },
+            { img: '/images/connect-guide/10.jpeg', caption: 'No formulário, responda Sim para confirmar que já é afiliado. Novos campos serão exibidos automaticamente.' },
+            { img: '/images/connect-guide/11.jpeg', caption: 'Preencha seu número de telefone e o ID de Afiliado que você copiou anteriormente.' },
+            { img: '/images/connect-guide/12.jpeg', caption: 'No campo de tema, selecione Tenho dúvidas/dificuldades com meu cadastro.' },
+            { img: '/images/connect-guide/13.jpeg', caption: 'Selecione o cenário Quero ativar a API e toque em Enviar. O retorno da Shopee costuma chegar em até 5 dias úteis.' }
+        ],
+        showSecret: false,
+        prev() { if (this.current > 0) this.current--; },
+        next() { if (this.current < this.steps.length - 1) this.current++; }
+     }"
+     @keydown.escape.window="guide = false"
+     @keydown.arrowright.window="if(guide) next()"
+     @keydown.arrowleft.window="if(guide) prev()"
+>
+
+    {{-- ── Modal Guia ───────────────────────────────────────────────────────── --}}
+    <div x-show="guide" x-transition.opacity class="fixed inset-0 z-40 bg-black/70" @click="guide = false" style="display:none"></div>
+
+    <div x-show="guide" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none">
+        <div class="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl flex flex-col" style="background:#1C1C1C; max-height:90vh">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-4 py-3 flex-shrink-0" style="border-bottom:1px solid #2A2A2A">
+                <span class="text-sm font-semibold text-d-text">Como obter seu App ID</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-d-muted" x-text="(current + 1) + ' / ' + steps.length"></span>
+                    <button @click="guide = false" class="text-d-muted hover:text-d-text transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Imagem --}}
+            <div class="relative overflow-hidden flex-shrink-0" style="height:420px; background:#141414">
+                <template x-for="(step, index) in steps" :key="index">
+                    <img
+                        x-show="current === index"
+                        x-transition.opacity
+                        :src="step.img"
+                        :alt="'Passo ' + (index + 1)"
+                        class="absolute inset-0 w-full h-full object-contain"
+                    />
+                </template>
+            </div>
+
+            {{-- Legenda --}}
+            <div class="px-4 py-3 flex-shrink-0" style="min-height:80px">
+                <p class="text-sm text-d-muted leading-relaxed" x-text="steps[current].caption"></p>
+            </div>
+
+            {{-- Dots --}}
+            <div class="flex justify-center gap-1.5 pb-2 flex-shrink-0 flex-wrap px-4">
+                <template x-for="(step, index) in steps" :key="index">
+                    <button @click="current = index"
+                            class="h-1.5 rounded-full transition-all"
+                            :style="current === index ? 'background:var(--color-primary); width:16px' : 'background:#444; width:6px'">
+                    </button>
+                </template>
+            </div>
+
+            {{-- Navegação --}}
+            <div class="flex gap-2 px-4 pb-4 flex-shrink-0">
+                <button @click="prev" :disabled="current === 0"
+                        class="flex-1 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-30"
+                        style="background:#272727; color:#9CA3AF">
+                    Anterior
+                </button>
+                <button @click="next" :disabled="current === steps.length - 1"
+                        class="flex-1 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-30"
+                        :style="current < steps.length - 1 ? 'background:var(--color-primary);color:#fff' : 'background:#272727;color:#9CA3AF'">
+                    Próximo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Página ───────────────────────────────────────────────────────────── --}}
 
     {{-- Logo --}}
     <div class="text-center mb-8">
@@ -38,15 +130,28 @@
     {{-- Instruções --}}
     <div class="card mb-4">
         <h3 class="text-sm font-semibold text-d-text mb-3">Como obter seu App ID e Chave</h3>
-        <ol class="space-y-2 text-sm text-d-muted list-decimal list-inside">
-            <li>Acesse <a href="https://affiliate.shopee.com.br" target="_blank" class="font-medium" style="color:var(--color-primary)">affiliate.shopee.com.br</a></li>
-            <li>Vá em <strong class="text-d-text">Ferramentas → API</strong> e solicite a liberação caso ainda não tenha</li>
-            <li>Crie um novo App e copie o <strong class="text-d-text">App ID</strong> e a <strong class="text-d-text">Chave de acesso</strong></li>
+        <ol class="space-y-2 text-sm text-d-muted list-decimal list-inside mb-4">
+            <li>Acesse <a href="https://affiliate.shopee.com.br/open_api" target="_blank" class="font-medium" style="color:var(--color-primary)">affiliate.shopee.com.br</a> — se já estiver logado, você será direcionado direto ao painel</li>
+            <li>No painel lateral esquerdo, role até o final. Se a opção não aparecer, feche os menus abertos até revelar <strong class="text-d-text">Abrir API</strong></li>
+            <li>Acesse <strong class="text-d-text">Abrir API</strong> — se o botão <strong class="text-d-text">Aplicar</strong> estiver disponível, clique nele para solicitar a liberação</li>
+            <li>Após liberado, copie o <strong class="text-d-text">App ID</strong> e a <strong class="text-d-text">Chave de acesso</strong> e cole nos campos abaixo</li>
         </ol>
+        <div style="border-top:1px solid #2A2A2A; padding-top:12px">
+            <p class="text-xs text-d-muted mb-2">Saiba como solicitar a liberação de API:</p>
+            <button @click="guide = true; current = 0" type="button"
+                    class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
+                    style="color:var(--color-primary)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2zM12 9v4"/>
+                </svg>
+                Ver passo a passo.
+            </button>
+        </div>
     </div>
 
     {{-- Formulário --}}
-    <div class="card" x-data="{ showSecret: false }">
+    <div class="card">
 
         @if (session('error'))
             <div class="alert-error mb-4">{{ session('error') }}</div>
@@ -95,6 +200,7 @@
             </form>
         </div>
     </div>
+
 </div>
 
 </body>

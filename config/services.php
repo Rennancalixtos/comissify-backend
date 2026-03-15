@@ -36,6 +36,12 @@ return [
         'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
     ],
 
+    'mercadopago' => [
+        'access_token' => env('MP_ACCESS_TOKEN'),
+        'public_key'   => env('MP_PUBLIC_KEY'),
+        'webhook_secret' => env('MP_WEBHOOK_SECRET'), // para validar assinatura do webhook
+    ],
+
     'appium' => [
         'server_url'     => env('APPIUM_SERVER_URL', 'http://localhost:4723'),
         'implicit_wait'  => env('APPIUM_IMPLICIT_WAIT', 10000),
