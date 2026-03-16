@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\ProcessProductCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware) {
-
+        $middleware->trustProxies(at: '*');
         $middleware->alias([
             'shopee.connected' => \App\Http\Middleware\EnsureShopeeConnected::class,
             'admin'            => \App\Http\Middleware\EnsureAdmin::class,
