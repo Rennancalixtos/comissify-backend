@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 // ─── Landing ──────────────────────────────────────────────────────────────────
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
+Route::get('/tendencias',      [\App\Http\Controllers\TrendingController::class, 'trending'])->name('trending');
+Route::get('/maiores-comissoes', [\App\Http\Controllers\TrendingController::class, 'commissions'])->name('commissions');
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');

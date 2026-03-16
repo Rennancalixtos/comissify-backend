@@ -20,10 +20,12 @@ return [
     ],
 
     'shopee' => [
-        'app_id'       => env('SHOPEE_APP_ID'),
-        'secret'       => env('SHOPEE_SECRET'),
-        'affiliate_id' => env('SHOPEE_AFFILIATE_ID'),
-        'api_base_url' => env('SHOPEE_API_BASE_URL', 'https://open-api.affiliate.shopee.com.br/graphql'),
+        'app_id'              => env('SHOPEE_APP_ID'),
+        'secret'              => env('SHOPEE_SECRET'),
+        'affiliate_id'        => env('SHOPEE_AFFILIATE_ID'),
+        'api_base_url'        => env('SHOPEE_API_BASE_URL', 'https://open-api.affiliate.shopee.com.br/graphql'),
+        'trending_app_id'     => env('SHOPEE_TRENDING_APP_ID'),
+        'trending_app_secret' => env('SHOPEE_TRENDING_APP_SECRET'),
     ],
 
     'openai' => [
