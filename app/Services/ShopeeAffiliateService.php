@@ -16,7 +16,7 @@ class ShopeeAffiliateService
     }
 
 
-    public function getProducts(UserCredential $cred, array $params = []): array
+    public function getProducts(object $cred, array $params = []): array
     {
         $keyword    = $params['keyword'] ?? null;
         $categoryId = isset($params['productCatId']) ? (int) $params['productCatId'] : null;
@@ -274,7 +274,7 @@ class ShopeeAffiliateService
     }
 
 
-    private function request(UserCredential $cred, string $query, array $variables = [], string $action = 'Request'): array
+    private function request(object $cred, string $query, array $variables = [], string $action = 'Request'): array
     {
         $appId   = $cred->app_id;
         $secret  = $cred->app_secret;

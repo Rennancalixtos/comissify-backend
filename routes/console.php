@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::job(new DiscoverProductsJob())->hourly()->withoutOverlapping();
 
+Schedule::command('trending:fetch')->everySixHours()->withoutOverlapping();
+
 // Reset daily post counters at midnight
 Schedule::call(function () {
     \App\Models\Account::query()->update(['posts_today' => 0]);
