@@ -253,8 +253,8 @@
         </div>
         <div class="flex items-center gap-5 text-xs text-d-muted">
             <a href="{{ route('home') }}" class="hover:text-d-text transition-colors">Início</a>
-            <a href="#" class="hover:text-d-text transition-colors">Termos de uso</a>
-            <a href="#" class="hover:text-d-text transition-colors">Privacidade</a>
+            <a href="{{ route('terms') }}" class="hover:text-d-text transition-colors">Termos de uso</a>
+            <a href="{{ route('privacy') }}" class="hover:text-d-text transition-colors">Privacidade</a>
         </div>
     </div>
 </footer>

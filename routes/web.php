@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
 Route::get('/tendencias',      [\App\Http\Controllers\TrendingController::class, 'trending'])->name('trending');
 Route::get('/maiores-comissoes', [\App\Http\Controllers\TrendingController::class, 'commissions'])->name('commissions');
+Route::get('/privacidade',     fn() => view('privacy'))->name('privacy');
+Route::get('/termos',          fn() => view('terms'))->name('terms');
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');

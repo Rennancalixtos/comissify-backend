@@ -506,8 +506,8 @@
             <span class="text-xs text-d-muted ml-1">— Link afiliado Shopee automático</span>
         </div>
         <div class="flex items-center gap-5 text-xs text-d-muted">
-            <a href="#" class="hover:text-d-text transition-colors">Termos de uso</a>
-            <a href="#" class="hover:text-d-text transition-colors">Privacidade</a>
+            <a href="{{ route('terms') }}" class="hover:text-d-text transition-colors">Termos de uso</a>
+            <a href="{{ route('privacy') }}" class="hover:text-d-text transition-colors">Privacidade</a>
             <a href="#" class="hover:text-d-text transition-colors">Contato</a>
         </div>
     </div>
