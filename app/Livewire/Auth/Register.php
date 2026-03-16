@@ -84,8 +84,9 @@ class Register extends Component
         if (app()->isLocal() && env('SHOPEE_MOCK', false)) {
             session()->flash('otp_dev', "DEV — código OTP: {$code}");
         } else {
-            Mail::raw(
-                "Seu código de verificação Comissify: {$code}\n\nExpira em 15 minutos.",
+            Mail::send(
+                'emails.otp',
+                ['code' => $code],
                 fn ($m) => $m->to($email)->subject('Verificação de e-mail — Comissify')
             );
         }
