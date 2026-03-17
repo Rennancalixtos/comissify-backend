@@ -32,6 +32,7 @@ class Posts extends Component
     public function getLinksProperty()
     {
         return UserAffiliateLink::where('user_id', Auth::id())
+            ->withCount('posts')
             ->latest()
             ->get();
     }
@@ -64,11 +65,22 @@ class Posts extends Component
 
     public function selectLink(int $linkId): void
     {
-        $this->selectedLinkId  = $linkId;
-        $this->activeTab       = '';
-        $this->pinterestPins   = [];
-        $this->pinterestQuery  = '';
-        $this->error           = null;
+        $this->selectedLinkId = $linkId;
+        $this->activeTab      = '';
+        $this->pinterestPins  = [];
+        $this->pinterestQuery = '';
+        $this->error          = null;
+        $this->flashMsg       = null;
+    }
+
+    public function clearProduct(): void
+    {
+        $this->selectedLinkId = null;
+        $this->activeTab      = '';
+        $this->pinterestPins  = [];
+        $this->pinterestQuery = '';
+        $this->error          = null;
+        $this->flashMsg       = null;
     }
 
     public function selectTab(string $tab): void
@@ -77,10 +89,17 @@ class Posts extends Component
         $this->pinterestPins = [];
         $this->error         = null;
 
-        // Auto-fill Pinterest query with product name
         if ($tab === 'pinterest' && $this->selectedLink) {
             $this->pinterestQuery = $this->selectedLink->product_name;
         }
+    }
+
+    public function clearTab(): void
+    {
+        $this->activeTab     = '';
+        $this->pinterestPins = [];
+        $this->error         = null;
+        $this->flashMsg      = null;
     }
 
     public function createPost(string $type): void
@@ -116,9 +135,8 @@ class Posts extends Component
         // For now: immediately mock the result (no queue)
         $this->processMock($post, $link, $type);
 
-        $this->flashMsg = 'Post gerado com sucesso!';
+        $this->flashMsg = 'Conteúdo gerado com sucesso!';
         $this->error    = null;
-        $this->activeTab = '';
     }
 
     public function searchPinterest(): void
