@@ -40,17 +40,30 @@
         <div class="space-y-4">
             <div>
                 <label class="block text-xs text-d-muted mb-1.5">Nome completo</label>
-                <input wire:model="name" type="text" class="form-input w-full" placeholder="Seu nome" autofocus/>
+                <input wire:model="name" type="text" maxlength="100"
+                       class="form-input w-full" placeholder="Seu nome" autofocus
+                       x-on:input="$event.target.value = $event.target.value.replace(/[^a-zA-ZÀ-ÿ\s'\-\.]/g, '')"/>
                 @error('name') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="block text-xs text-d-muted mb-1.5">E-mail</label>
-                <input wire:model="email" type="email" class="form-input w-full" placeholder="seu@email.com"/>
+                <input wire:model="email" type="email" maxlength="254"
+                       class="form-input w-full" placeholder="seu@email.com"
+                       x-on:blur="$event.target.value = $event.target.value.trim().toLowerCase(); $wire.set('email', $event.target.value)"/>
                 @error('email') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="block text-xs text-d-muted mb-1.5">Telefone (WhatsApp)</label>
-                <input wire:model="phone" type="tel" class="form-input w-full" placeholder="(11) 99999-9999"/>
+                <input wire:model.blur="phone" type="tel" inputmode="numeric" maxlength="15"
+                       class="form-input w-full" placeholder="(11) 99999-9999"
+                       x-on:input="
+                           let v = $event.target.value.replace(/\D/g,'').substring(0,11);
+                           if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                           else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d*)/, '($1) $2-$3');
+                           else if (v.length > 2) v = v.replace(/^(\d{2})(\d*)/, '($1) $2');
+                           else if (v.length) v = '(' + v;
+                           $event.target.value = v;
+                       "/>
                 @error('phone') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
