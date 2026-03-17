@@ -51,7 +51,35 @@
 
     {{-- Error --}}
     @if($error)
+    @if(str_contains($error, 'affiliate.shopee.com.br'))
+    {{-- Sem acesso à API de Afiliados --}}
+    <div class="rounded-xl border p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+         style="background:color-mix(in srgb,#f97316 8%,transparent);border-color:color-mix(in srgb,#f97316 30%,transparent)">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+             style="background:color-mix(in srgb,#f97316 20%,transparent)">
+            <svg class="w-5 h-5" style="color:#f97316" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm" style="color:#f97316">Conta sem acesso à API de Afiliados</p>
+            <p class="text-xs text-d-muted mt-0.5">
+                Sua conta Shopee ainda não tem permissão para usar a API de Afiliados.
+                Solicite acesso no portal oficial — normalmente é aprovado em poucos dias.
+            </p>
+        </div>
+        <a href="https://affiliate.shopee.com.br" target="_blank" rel="noopener noreferrer"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-80"
+           style="background:#f97316">
+            Solicitar acesso
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+        </a>
+    </div>
+    @else
     <div class="alert-error">{{ $error }}</div>
+    @endif
     @endif
 
     {{-- Bulk action bar --}}
@@ -67,134 +95,155 @@
     </div>
     @endif
 
-    {{-- Table --}}
+    {{-- Products --}}
     @if(!empty($products))
-    <div class="card !p-0 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                @php
-                    $sortIcon = function(string $field) use ($sortField, $sortDir): string {
-                        if ($sortField !== $field) return '<svg class="w-3 h-3 ml-1 opacity-30 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>';
-                        return $sortDir === 'asc'
-                            ? '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--color-primary)"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>'
-                            : '<svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--color-primary)"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>';
-                    };
-                    $thActive = 'style="color:var(--color-primary)"';
-                @endphp
-                <thead class="border-b border-d-border text-xs text-d-muted uppercase tracking-wider" style="background:#111111">
-                    <tr>
-                        <th class="hidden lg:table-cell px-4 py-3 text-left w-8">
-                            <input type="checkbox" wire:click="toggleSelectAll"
-                                   :checked="{{ json_encode($selectAll) }}"
-                                   class="rounded border-d-border bg-d-input"/>
-                        </th>
-                        <th class="hidden lg:table-cell px-4 py-3 text-left">#</th>
-                        <th class="px-4 py-3 text-left">Produto</th>
-                        <th class="hidden sm:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('sales')" {{ $sortField === 'sales' ? $thActive : '' }}>
-                            Vendidos {!! $sortIcon('sales') !!}
-                        </th>
-                        <th class="hidden sm:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('commission')" {{ $sortField === 'commission' ? $thActive : '' }}>
-                            Ganho {!! $sortIcon('commission') !!}
-                        </th>
-                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceMin')" {{ $sortField === 'priceMin' ? $thActive : '' }}>
-                            Preço Mín {!! $sortIcon('priceMin') !!}
-                        </th>
-                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceMax')" {{ $sortField === 'priceMax' ? $thActive : '' }}>
-                            Preço Máx {!! $sortIcon('priceMax') !!}
-                        </th>
-                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('commissionRate')" {{ $sortField === 'commissionRate' ? $thActive : '' }}>
-                            Taxa {!! $sortIcon('commissionRate') !!}
-                        </th>
-                        <th class="hidden lg:table-cell px-4 py-3 text-right cursor-pointer hover:text-d-text select-none" wire:click="sortBy('priceDiscountRate')" {{ $sortField === 'priceDiscountRate' ? $thActive : '' }}>
-                            Desc. {!! $sortIcon('priceDiscountRate') !!}
-                        </th>
-                        <th class="px-4 py-3 text-center">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-d-border">
-                    @foreach($products as $i => $product)
-                    <tr class="transition-colors hover:bg-d-card2" wire:key="product-{{ $product['itemId'] }}">
-                        <td class="hidden lg:table-cell px-4 py-3">
-                            <input type="checkbox"
-                                   wire:click="toggleSelect('{{ $product['itemId'] }}')"
-                                   @checked(in_array($product['itemId'], $selected))
-                                   class="rounded border-d-border bg-d-input"/>
-                        </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-d-muted">{{ $i + 1 }}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="{{ $product['imageUrl'] ?? '' }}" alt=""
-                                     class="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-d-input"
-                                     onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' rx=\'8\' fill=\'%231A1A1A\'/%3E%3Cpath d=\'M12 28l6-8 4 5 3-4 5 7H12z\' fill=\'%23333\'/%3E%3Ccircle cx=\'27\' cy=\'15\' r=\'3\' fill=\'%23333\'/%3E%3C/svg%3E'"/>
-                                <div class="min-w-0">
-                                    <p class="font-medium text-d-text truncate">{{ $product['productName'] }}</p>
-                                    <p class="text-xs text-d-muted truncate">{{ $product['shopName'] ?? '' }}</p>
-                                    {{-- Mobile: mostra ganho e vendidos inline --}}
-                                    <div class="flex items-center gap-2 mt-0.5 sm:hidden">
-                                        <span class="text-xs font-semibold text-green-400">R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}</span>
-                                        <span class="text-xs text-d-muted">· {{ number_format($product['sales'] ?? 0) }} vendidos</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="hidden sm:table-cell px-4 py-3 text-right text-d-muted">{{ number_format($product['sales'] ?? 0) }}</td>
-                        <td class="hidden sm:table-cell px-4 py-3 text-right font-semibold text-green-400">
-                            R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}
-                        </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-right text-d-text">
-                            R$ {{ number_format($product['priceMin'] ?? 0, 2, ',', '.') }}
-                        </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-right text-d-text">
-                            R$ {{ number_format($product['priceMax'] ?? 0, 2, ',', '.') }}
-                        </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-right">
-                            <span class="badge-green">{{ $product['commissionRate'] ?? 0 }}%</span>
-                        </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-right">
-                            @if(!empty($product['priceDiscountRate']))
-                            <span class="badge-primary">-{{ $product['priceDiscountRate'] }}%</span>
-                            @else
-                            <span class="text-d-border">—</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center justify-center gap-2">
-                                <button wire:click="showDetail('{{ $product['itemId'] }}')"
-                                        class="p-1.5 text-d-muted hover:text-d-text rounded-lg hover:bg-d-input transition-colors" title="Ver detalhes">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
-                                <button @click="open('{{ addslashes($product['offerLink'] ?? $product['productLink']) }}', '{{ addslashes($product['productName']) }}', '{{ $product['imageUrl'] ?? '' }}', 'R$ {{ number_format($product['priceMin'] ?? 0, 2, ',', '.') }}', 'R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}')"
-                                        class="p-1.5 rounded-lg hover:bg-d-input transition-colors" title="Gerar link"
-                                        style="color:var(--color-primary)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
 
-        {{-- Pagination --}}
-        @if(!empty($pageInfo))
-        <div class="px-4 py-3 border-t border-d-border flex items-center justify-between text-sm text-d-muted">
-            <span>Página {{ $pageInfo['page'] ?? 1 }}</span>
-            <div class="flex gap-2">
-                @if(($pageInfo['page'] ?? 1) > 1)
-                <button wire:click="loadPage({{ ($pageInfo['page'] - 1) }})" class="px-3 py-1 border border-d-border rounded-lg hover:bg-d-input transition-colors">← Anterior</button>
+    {{-- Sort + select all controls --}}
+    <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs text-d-muted flex-shrink-0">Ordenar:</span>
+
+        @php
+            $sortOptions = [
+                'sales'             => 'Mais vendidos',
+                'commission'        => 'Maior ganho',
+                'commissionRate'    => 'Maior taxa',
+                'priceMin'          => 'Menor preço',
+                'priceDiscountRate' => 'Maior desconto',
+            ];
+        @endphp
+
+        @foreach($sortOptions as $field => $label)
+        <button wire:click="sortBy('{{ $field }}')"
+                class="px-3 py-1 rounded-lg text-xs font-medium border transition-all duration-150 flex items-center gap-1"
+                style="{{ $sortField === $field
+                    ? 'background:var(--color-primary);border-color:var(--color-primary);color:#fff'
+                    : 'background:transparent;border-color:#2A2A2A;color:#9CA3AF' }}">
+            {{ $label }}
+            @if($sortField === $field)
+                {{ $sortDir === 'asc' ? '↑' : '↓' }}
+            @endif
+        </button>
+        @endforeach
+
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-d-muted cursor-pointer flex-shrink-0 select-none">
+            <input type="checkbox" wire:click="toggleSelectAll"
+                   :checked="{{ json_encode($selectAll) }}"
+                   class="rounded border-d-border bg-d-input"/>
+            Selecionar todos
+        </label>
+    </div>
+
+    {{-- Card grid --}}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @foreach($products as $i => $product)
+        @php $isSelected = in_array($product['itemId'], $selected); @endphp
+
+        <article class="product-search-card card !p-0 overflow-hidden flex flex-col group transition-all duration-200"
+                 style="animation-delay:{{ $i * 45 }}ms;{{ $isSelected ? 'border-color:var(--color-primary)' : '' }}"
+                 wire:key="product-{{ $product['itemId'] }}">
+
+            {{-- Image --}}
+            <div class="relative overflow-hidden" style="aspect-ratio:1/1;background:#111111">
+                <img src="{{ $product['imageUrl'] ?? '' }}"
+                     alt="{{ $product['productName'] }}"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                     loading="lazy"
+                     onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%231A1A1A\'/%3E%3Cpath d=\'M60 140l40-55 27 35 18-25 35 45H60z\' fill=\'%23333\'/%3E%3Ccircle cx=\'145\' cy=\'65\' r=\'18\' fill=\'%23333\'/%3E%3C/svg%3E'"/>
+
+                {{-- Checkbox --}}
+                <div class="absolute top-2 left-2">
+                    <input type="checkbox"
+                           wire:click="toggleSelect('{{ $product['itemId'] }}')"
+                           @checked($isSelected)
+                           class="w-4 h-4 rounded cursor-pointer"
+                           style="accent-color:var(--color-primary)"/>
+                </div>
+
+                {{-- Commission rate badge --}}
+                @if(!empty($product['commissionRate']) && $product['commissionRate'] > 0)
+                <div class="absolute top-2 right-2 px-2 py-0.5 rounded-lg text-white text-xs font-bold"
+                     style="background:var(--color-primary)">
+                    {{ $product['commissionRate'] }}%
+                </div>
                 @endif
-                @if(!empty($pageInfo['hasNextPage']))
-                <button wire:click="loadPage({{ ($pageInfo['page'] ?? 1) + 1 }})" class="px-3 py-1 border border-d-border rounded-lg hover:bg-d-input transition-colors">Próxima →</button>
+
+                {{-- Discount badge --}}
+                @if(!empty($product['priceDiscountRate']) && $product['priceDiscountRate'] > 0)
+                <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded-lg text-white text-xs font-bold"
+                     style="background:#dc2626">
+                    -{{ $product['priceDiscountRate'] }}%
+                </div>
                 @endif
             </div>
-        </div>
-        @endif
+
+            {{-- Info --}}
+            <div class="flex flex-col gap-1.5 p-3 flex-1">
+                <h3 class="text-sm font-medium text-d-text leading-snug line-clamp-2">
+                    {{ $product['productName'] }}
+                </h3>
+
+                @if(!empty($product['shopName']))
+                <p class="text-xs text-d-muted truncate">{{ $product['shopName'] }}</p>
+                @endif
+
+                <div class="flex items-end justify-between mt-auto pt-1">
+                    <div>
+                        @if(!empty($product['priceMin']) && $product['priceMin'] > 0)
+                        <p class="text-sm font-bold" style="color:var(--color-primary)">
+                            R$ {{ number_format($product['priceMin'], 2, ',', '.') }}
+                        </p>
+                        @endif
+                        @if(!empty($product['sales']) && $product['sales'] > 0)
+                        <p class="text-xs text-d-muted">{{ number_format($product['sales']) }} vendidos</p>
+                        @endif
+                    </div>
+
+                    @if(!empty($product['commission']) && $product['commission'] > 0)
+                    <div class="text-right">
+                        <p class="text-xs text-d-muted leading-none">Ganhe</p>
+                        <p class="text-sm font-semibold text-green-400">R$ {{ number_format($product['commission'], 2, ',', '.') }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Action buttons --}}
+            <div class="flex border-t divide-x" style="border-color:#2A2A2A">
+                <button wire:click="showDetail('{{ $product['itemId'] }}')"
+                        class="flex-1 py-2.5 text-xs font-medium text-d-muted hover:text-d-text hover:bg-d-input transition-colors flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Detalhes
+                </button>
+                <button @click="open('{{ addslashes($product['offerLink'] ?? $product['productLink']) }}', '{{ addslashes($product['productName']) }}', '{{ $product['imageUrl'] ?? '' }}', 'R$ {{ number_format($product['priceMin'] ?? 0, 2, ',', '.') }}', 'R$ {{ number_format($product['commission'] ?? 0, 2, ',', '.') }}')"
+                        class="flex-1 py-2.5 text-xs font-medium hover:bg-d-input transition-colors flex items-center justify-center gap-1.5"
+                        style="color:var(--color-primary)">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                    Gerar link
+                </button>
+            </div>
+        </article>
+        @endforeach
     </div>
+
+    {{-- Pagination --}}
+    @if(!empty($pageInfo))
+    <div class="flex items-center justify-between text-sm text-d-muted pt-1">
+        <span>Página {{ $pageInfo['page'] ?? 1 }}</span>
+        <div class="flex gap-2">
+            @if(($pageInfo['page'] ?? 1) > 1)
+            <button wire:click="loadPage({{ ($pageInfo['page'] - 1) }})" class="px-3 py-1.5 border border-d-border rounded-lg hover:bg-d-input transition-colors text-xs">← Anterior</button>
+            @endif
+            @if(!empty($pageInfo['hasNextPage']))
+            <button wire:click="loadPage({{ ($pageInfo['page'] ?? 1) + 1 }})" class="px-3 py-1.5 border border-d-border rounded-lg hover:bg-d-input transition-colors text-xs">Próxima →</button>
+            @endif
+        </div>
+    </div>
+    @endif
+
     @else
     {{-- Empty state --}}
     <div class="card text-center py-16">
