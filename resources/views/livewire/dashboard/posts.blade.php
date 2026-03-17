@@ -2,7 +2,7 @@
     $toolsDef = [
         [
             'key'   => 'text',
-            'label' => 'Post de Texto',
+            'label' => 'Texto AI',
             'desc'  => 'Gera um título chamativo e uma legenda completa otimizada para redes sociais, com o seu link de afiliado já incluso. Pronto para copiar e publicar.',
             'cost'  => $this->prices['text'],
             'color' => '#6366f1',
@@ -372,31 +372,41 @@
                         <p class="text-xs text-d-muted leading-relaxed">{{ $result['description'] ?? '' }}</p>
                         <p class="text-xs font-mono truncate" style="color:var(--color-primary)">{{ $link->affiliate_link ?? '' }}</p>
                     </div>
-                    <button @click="navigator.clipboard.writeText('{{ addslashes($caption) }}'); copied = true; setTimeout(() => copied = false, 2500)"
-                            class="w-full flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-semibold transition-all"
-                            style="border-color:#2A2A2A;color:#9CA3AF"
-                            x-bind:style="copied ? 'border-color:rgba(34,197,94,.4);color:#4ade80;background:rgba(34,197,94,.05)' : ''">
-                        <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                        </svg>
-                        <svg x-show="copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span x-text="copied ? 'Legenda copiada!' : 'Copiar legenda completa'"></span>
-                    </button>
+                    <div class="flex gap-2">
+                        <button @click="navigator.clipboard.writeText('{{ addslashes($caption) }}'); copied = true; setTimeout(() => copied = false, 2500)"
+                                class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-semibold transition-all"
+                                style="border-color:#2A2A2A;color:#9CA3AF"
+                                x-bind:style="copied ? 'border-color:rgba(34,197,94,.4);color:#4ade80;background:rgba(34,197,94,.05)' : ''">
+                            <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg x-show="copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span x-text="copied ? 'Copiado!' : 'Copiar legenda'"></span>
+                        </button>
+                        @if($this->telegramGroups->isNotEmpty())
+                        @include('livewire.dashboard.partials.telegram-send-btn', ['postId' => $post['id']])
+                        @endif
+                    </div>
                 </div>
 
                 @elseif($activeTab === 'image' && $post['status'] === 'completed')
                 <div class="space-y-3">
                     <img src="{{ $result['image_url'] ?? '' }}" alt="" class="rounded-xl w-full object-cover" style="max-height:300px">
-                    <a href="{{ $result['image_url'] ?? '#' }}" download
-                       class="w-full flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-semibold transition-colors hover:bg-d-input"
-                       style="border-color:#2A2A2A;color:#9CA3AF">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        Baixar imagem
-                    </a>
+                    <div class="flex gap-2">
+                        <a href="{{ $result['image_url'] ?? '#' }}" download
+                           class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-semibold transition-colors hover:bg-d-input"
+                           style="border-color:#2A2A2A;color:#9CA3AF">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Baixar imagem
+                        </a>
+                        @if($this->telegramGroups->isNotEmpty())
+                        @include('livewire.dashboard.partials.telegram-send-btn', ['postId' => $post['id']])
+                        @endif
+                    </div>
                 </div>
 
                 @elseif($activeTab === 'video' && $post['status'] === 'completed')

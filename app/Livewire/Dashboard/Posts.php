@@ -5,7 +5,9 @@ namespace App\Livewire\Dashboard;
 use App\Models\SystemPrice;
 use App\Models\UserAffiliateLink;
 use App\Models\UserPost;
+use App\Models\UserTelegramGroup;
 use App\Services\PinterestService;
+use App\Services\TelegramService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -191,6 +193,55 @@ class Posts extends Component
         $this->pinterestPins = $result['pins'];
     }
 
+
+    public function getTelegramGroupsProperty()
+    {
+        return UserTelegramGroup::where('user_id', Auth::id())->get();
+    }
+
+    public function sendToTelegram(int $postId, int $groupId): void
+    {
+        $user  = Auth::user();
+        $post  = UserPost::find($postId);
+        $group = UserTelegramGroup::where('id', $groupId)->where('user_id', $user->id)->first();
+
+        if (!$post || $post->user_id !== $user->id || !$group) {
+            $this->error = 'Não foi possível enviar. Verifique a conexão.';
+            return;
+        }
+
+        $link = UserAffiliateLink::find($post->affiliate_link_id);
+        if (!$link) {
+            $this->error = 'Produto não encontrado.';
+            return;
+        }
+
+        $telegram = app(TelegramService::class);
+        $template = $group->message_template ?? $telegram->defaultTemplate();
+        $result   = $post->result ?? [];
+        $sent     = false;
+
+        if ($post->type === 'image' && !empty($result['image_url'])) {
+            $caption = $telegram->resolveTemplate($template, $link);
+            $sent    = $telegram->sendPhoto($group->chat_id, $result['image_url'], $caption);
+        } else {
+            if ($post->type === 'text' && !empty($result['title'])) {
+                $caption = '<b>' . htmlspecialchars($result['title']) . '</b>'
+                         . "\n\n" . ($result['description'] ?? '')
+                         . "\n\n" . '<a href="' . $link->affiliate_link . '">Comprar agora →</a>';
+            } else {
+                $caption = $telegram->resolveTemplate($template, $link);
+            }
+            $sent = $telegram->sendMessage($group->chat_id, $caption);
+        }
+
+        if ($sent) {
+            $this->flashMsg = 'Enviado para ' . $group->chat_title . '!';
+            $this->error    = null;
+        } else {
+            $this->error = 'Falha ao enviar. Verifique se o bot está no grupo.';
+        }
+    }
 
     private function processMock(UserPost $post, UserAffiliateLink $link, string $type): void
     {

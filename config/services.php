@@ -38,6 +38,12 @@ return [
         'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
     ],
 
+    'telegram' => [
+        'bot_token'      => env('TELEGRAM_BOT_TOKEN'),
+        'bot_username'   => env('TELEGRAM_BOT_USERNAME'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+    ],
+
     'mercadopago' => [
         'access_token' => env('MP_ACCESS_TOKEN'),
         'public_key'   => env('MP_PUBLIC_KEY'),
