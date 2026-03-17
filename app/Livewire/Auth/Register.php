@@ -32,14 +32,22 @@ class Register extends Component
     {
         return match ($this->step) {
             1 => [
-                'name'                  => 'required|string|max:100',
-                'email'                 => 'required|email|unique:users,email',
-                'phone'                 => 'required|string|min:10|max:20|unique:users,phone',
+                'name'                  => ['required', 'string', 'min:2', 'max:100', 'regex:/^[\p{L}\s\'\-\.]+$/u'],
+                'email'                 => 'required|email:rfc|unique:users,email',
+                'phone'                 => 'required|digits_between:10,11|unique:users,phone',
                 'password'              => 'required|min:8|confirmed',
                 'password_confirmation' => 'required',
             ],
             default => [],
         };
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.regex'             => 'O nome deve conter apenas letras, espaços, hífens e apóstrofos.',
+            'phone.digits_between'   => 'O telefone deve ter 10 ou 11 dígitos (DDD + número).',
+        ];
     }
 
     private function isDisposableEmail(string $email): bool
@@ -56,6 +64,11 @@ class Register extends Component
 
     public function submitStep1(): void
     {
+        // Sanitize before validation
+        $this->name  = trim(preg_replace('/\s+/', ' ', $this->name));
+        $this->email = strtolower(trim($this->email));
+        $this->phone = preg_replace('/\D/', '', $this->phone);
+
         $this->validate($this->rules());
 
         if ($this->isDisposableEmail($this->email)) {
@@ -67,7 +80,7 @@ class Register extends Component
         Cache::put("register_data:{$this->email}", [
             'name'     => $this->name,
             'email'    => $this->email,
-            'phone'    => preg_replace('/\D/', '', $this->phone),
+            'phone'    => $this->phone,
             'password' => Hash::make($this->password),
         ], now()->addMinutes(30));
 
