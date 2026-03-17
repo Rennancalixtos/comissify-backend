@@ -30,6 +30,7 @@ Route::middleware('auth')->get('/download-proxy', [\App\Http\Controllers\Downloa
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', \App\Livewire\Dashboard\ProductSearch::class)->name('dashboard');
     Route::get('/posts',     \App\Livewire\Dashboard\Posts::class)->name('posts');
+    Route::get('/canais',    \App\Livewire\Dashboard\TelegramChannels::class)->name('channels');
     Route::get('/relatorio', \App\Livewire\Dashboard\ConversionReport::class)->name('report');
     Route::get('/creditos',  \App\Livewire\Dashboard\Credits::class)->name('credits');
 });
@@ -42,9 +43,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/pending',    [\App\Http\Controllers\PaymentController::class, 'pending'])->name('payment.pending');
 });
 
-// Webhook do MP — sem auth, sem CSRF (exceção configurada em bootstrap/app.php)
+// Webhooks — sem auth, sem CSRF (exceções em bootstrap/app.php)
 Route::post('/webhook/mercadopago', [\App\Http\Controllers\MercadoPagoWebhookController::class, 'handle'])
     ->name('payment.webhook');
+
+Route::post('/webhook/telegram', [\App\Http\Controllers\TelegramWebhookController::class, 'handle'])
+    ->name('telegram.webhook');
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

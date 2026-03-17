@@ -56,6 +56,16 @@
                 Criador
             </a>
 
+            <a href="{{ route('channels') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+               style="{{ request()->routeIs('channels') ? 'background:color-mix(in srgb,var(--color-primary) 15%,transparent);color:var(--color-primary);' : 'color:#9CA3AF;' }}"
+               :class="{{ request()->routeIs('channels') ? 'false' : 'true' }} && 'hover:bg-white/5 hover:text-d-text'">
+                <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21.8 3.2L2.4 10.6c-1.3.5-1.3 1.3-.2 1.6l4.9 1.5 1.9 5.8c.3.7.1 1 .8 1 .5 0 .8-.3 1.1-.6l2.6-2.5 5.1 3.8c.9.5 1.6.3 1.8-.9l3.3-15.5c.3-1.4-.5-2-1.9-1.6z"/>
+                </svg>
+                Canais de Envio
+            </a>
+
             <a href="{{ route('report') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
                style="{{ request()->routeIs('report') ? 'background:color-mix(in srgb,var(--color-primary) 15%,transparent);color:var(--color-primary);' : 'color:#9CA3AF;' }}"
