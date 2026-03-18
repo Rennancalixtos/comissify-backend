@@ -284,9 +284,9 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <p class="text-sm font-semibold text-d-text">{{ $activeTool['label'] }}</p>
-                        @if($activeTool['beta'])
+                        @if($activeTool['soon'] ?? false)
                         <span class="text-xs font-bold px-1.5 py-0.5 rounded"
-                              style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)">Beta</span>
+                              style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)">Em breve</span>
                         @endif
                     </div>
                     @if($activeTab === 'text')
