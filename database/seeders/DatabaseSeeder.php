@@ -58,6 +58,22 @@ class DatabaseSeeder extends Seeder
             'value'       => 0.010000,
             'description' => 'Custo por link afiliado gerado',
         ]);
+        SystemPrice::updateOrCreate(['key' => 'post_text_cost'], [
+            'value'       => 0.200000,
+            'description' => 'Custo por Texto AI após as 10 gerações gratuitas diárias',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'post_image_cost'], [
+            'value'       => 0.990000,
+            'description' => 'Custo por Imagem com IA (Pollinations)',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'post_video_cost'], [
+            'value'       => 1.990000,
+            'description' => 'Custo por Vídeo de Venda',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'post_pinterest_cost'], [
+            'value'       => 0.100000,
+            'description' => 'Custo por busca no Pinterest',
+        ]);
 
         \App\Models\Setting::updateOrCreate(['key' => 'theme_color'], [
             'value'       => 'purple',

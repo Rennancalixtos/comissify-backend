@@ -1,12 +1,14 @@
 @php
+    $usage    = $this->textDailyUsage;
     $toolsDef = [
         [
             'key'   => 'text',
             'label' => 'Texto AI',
-            'desc'  => 'Gera um título chamativo e uma legenda completa otimizada para redes sociais, com o seu link de afiliado já incluso. Pronto para copiar e publicar.',
+            'desc'  => 'Gera um título chamativo e uma legenda completa com IA, otimizada para WhatsApp, Telegram e Instagram. Pronto para copiar e publicar.',
             'cost'  => $this->prices['text'],
             'color' => '#6366f1',
             'icon'  => 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12',
+            'soon'  => false,
         ],
         [
             'key'   => 'image',
@@ -15,6 +17,7 @@
             'cost'  => $this->prices['image'],
             'color' => '#ec4899',
             'icon'  => 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+            'soon'  => true,
         ],
         [
             'key'   => 'video',
@@ -23,6 +26,7 @@
             'cost'  => $this->prices['video'],
             'color' => '#f59e0b',
             'icon'  => 'M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z',
+            'beta'  => false,
         ],
         [
             'key'   => 'pinterest',
@@ -31,6 +35,7 @@
             'cost'  => $this->prices['pinterest'],
             'color' => '#e60023',
             'icon'  => 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z',
+            'soon'  => false,
         ],
     ];
 @endphp
@@ -141,21 +146,46 @@
     {{-- Grid de ferramentas --}}
     <div class="grid sm:grid-cols-2 gap-4">
         @foreach($toolsDef as $tool)
-        <button wire:click="selectTab('{{ $tool['key'] }}')"
-                class="card text-left flex flex-col gap-4 transition-all duration-200 group hover:border-opacity-60"
-                style="min-height:180px">
+        @php $disabled = $tool['soon'] ?? false; @endphp
+        <button @if(!$disabled) wire:click="selectTab('{{ $tool['key'] }}')" @endif
+                class="card text-left flex flex-col gap-4 transition-all duration-200 group"
+                style="min-height:180px{{ $disabled ? ';opacity:.55;cursor:not-allowed' : '' }}"
+                @if($disabled) disabled @endif>
 
             <div class="flex items-start justify-between">
-                <div class="w-11 h-11 rounded-xl flex items-center justify-center"
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center relative"
                      style="background:color-mix(in srgb,{{ $tool['color'] }} 15%,transparent)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
                          style="color:{{ $tool['color'] }}">
                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $tool['icon'] }}"/>
                     </svg>
+                    @if($disabled)
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                         style="background:#272727;border:1px solid #2A2A2A">
+                        <svg class="w-2.5 h-2.5 text-d-muted" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                    </div>
+                    @endif
                 </div>
-                <span class="text-xs font-bold" style="color:{{ $tool['color'] }}">
-                    R$ {{ number_format($tool['cost'], 2, ',', '.') }}
-                </span>
+                <div class="flex flex-col items-end gap-1">
+                    @if($disabled)
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded"
+                              style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)">Em breve</span>
+                    @elseif($tool['key'] === 'text')
+                        @if($usage['is_free'])
+                        <span class="text-xs font-bold" style="color:#4ade80">Grátis</span>
+                        <span class="text-xs text-d-muted">{{ $usage['remaining'] }}/{{ $usage['limit'] }} hoje</span>
+                        @else
+                        <span class="text-xs font-bold" style="color:{{ $tool['color'] }}">R$ {{ number_format($tool['cost'], 2, ',', '.') }}</span>
+                        <span class="text-xs text-d-muted">cota esgotada</span>
+                        @endif
+                    @else
+                        <span class="text-xs font-bold" style="color:{{ $tool['color'] }}">
+                            R$ {{ number_format($tool['cost'], 2, ',', '.') }}
+                        </span>
+                    @endif
+                </div>
             </div>
 
             <div class="flex-1">
@@ -163,6 +193,7 @@
                 <p class="text-xs text-d-muted leading-relaxed">{{ $tool['desc'] }}</p>
             </div>
 
+            @if(!$disabled)
             <div class="flex items-center gap-1.5 text-xs font-semibold transition-colors"
                  style="color:{{ $tool['color'] }}">
                 Selecionar
@@ -170,6 +201,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </div>
+            @else
+            <div class="flex items-center gap-1.5 text-xs text-d-muted">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                Em breve
+            </div>
+            @endif
         </button>
         @endforeach
     </div>
@@ -243,8 +282,22 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-d-text">{{ $activeTool['label'] }}</p>
-                    <p class="text-xs text-d-muted">R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por geração</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-semibold text-d-text">{{ $activeTool['label'] }}</p>
+                        @if($activeTool['beta'])
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded"
+                              style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)">Beta</span>
+                        @endif
+                    </div>
+                    @if($activeTab === 'text')
+                        @if($usage['is_free'])
+                        <p class="text-xs" style="color:#4ade80">{{ $usage['remaining'] }} de {{ $usage['limit'] }} gerações gratuitas restantes hoje</p>
+                        @else
+                        <p class="text-xs text-d-muted">Cota gratuita esgotada · R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por geração</p>
+                        @endif
+                    @else
+                        <p class="text-xs text-d-muted">R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por geração</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -365,15 +418,61 @@
 
             <div class="p-4">
                 @if($activeTab === 'text' && $post['status'] === 'completed')
-                @php $caption = ($result['title'] ?? '') . "\n\n" . ($result['description'] ?? '') . "\n\n" . ($link->affiliate_link ?? ''); @endphp
-                <div x-data="{ copied: false }" class="space-y-3">
-                    <div class="rounded-xl p-4 space-y-2" style="background:#111111;border:1px solid rgba(255,255,255,0.05)">
-                        <p class="text-sm font-semibold text-d-text leading-snug">{{ $result['title'] ?? '' }}</p>
-                        <p class="text-xs text-d-muted leading-relaxed">{{ $result['description'] ?? '' }}</p>
-                        <p class="text-xs font-mono truncate" style="color:var(--color-primary)">{{ $link->affiliate_link ?? '' }}</p>
+                @php
+                    $fullText = ($result['title'] ?? '') . "\n\n" . ($result['description'] ?? '') . "\n\n" . ($link->affiliate_link ?? '');
+                    $safeText = addslashes(str_replace(["\r\n", "\r", "\n"], '\n', $fullText));
+                @endphp
+                <div x-data="{
+                        editing: false,
+                        copied: false,
+                        title: {{ json_encode($result['title'] ?? '') }},
+                        desc: {{ json_encode($result['description'] ?? '') }},
+                        link: {{ json_encode($link->affiliate_link ?? '') }},
+                        get full() { return this.title + '\n\n' + this.desc + (this.link ? '\n\n🛒 ' + this.link : ''); },
+                        copy() {
+                            navigator.clipboard.writeText(this.full);
+                            this.copied = true;
+                            setTimeout(() => this.copied = false, 2500);
+                        }
+                     }" class="space-y-3">
+
+                    {{-- Preview / Edit toggle --}}
+                    <div class="rounded-xl overflow-hidden" style="background:#111111;border:1px solid rgba(255,255,255,0.05)">
+                        <div class="flex items-center justify-between px-3 py-2 border-b border-d-border">
+                            <span class="text-xs text-d-muted">Texto gerado</span>
+                            <button @click="editing = !editing"
+                                    class="text-xs font-medium transition-colors"
+                                    style="color:var(--color-primary)"
+                                    x-text="editing ? 'Fechar edição' : 'Editar'">
+                            </button>
+                        </div>
+
+                        {{-- Read view --}}
+                        <div x-show="!editing" class="p-4 space-y-2">
+                            <p class="text-sm font-semibold text-d-text leading-snug" x-text="title"></p>
+                            <p class="text-xs text-d-muted leading-relaxed whitespace-pre-wrap" x-text="desc"></p>
+                            <p class="text-xs font-mono truncate" style="color:var(--color-primary)">{{ $link->affiliate_link ?? '' }}</p>
+                        </div>
+
+                        {{-- Edit view --}}
+                        <div x-show="editing" class="p-3 space-y-2">
+                            <div>
+                                <label class="text-xs text-d-muted block mb-1">Título</label>
+                                <input x-model="title" type="text"
+                                       class="w-full rounded-lg px-3 py-2 text-sm text-d-text"
+                                       style="background:#1C1C1C;border:1px solid #2A2A2A;outline:none"/>
+                            </div>
+                            <div>
+                                <label class="text-xs text-d-muted block mb-1">Texto</label>
+                                <textarea x-model="desc" rows="4"
+                                          class="w-full rounded-lg px-3 py-2 text-xs text-d-text leading-relaxed resize-none"
+                                          style="background:#1C1C1C;border:1px solid #2A2A2A;outline:none"></textarea>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="flex gap-2">
-                        <button @click="navigator.clipboard.writeText('{{ addslashes($caption) }}'); copied = true; setTimeout(() => copied = false, 2500)"
+                        <button @click="copy()"
                                 class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-xs font-semibold transition-all"
                                 style="border-color:#2A2A2A;color:#9CA3AF"
                                 x-bind:style="copied ? 'border-color:rgba(34,197,94,.4);color:#4ade80;background:rgba(34,197,94,.05)' : ''">
