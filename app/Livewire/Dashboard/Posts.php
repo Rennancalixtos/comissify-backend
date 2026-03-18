@@ -6,30 +6,34 @@ use App\Models\SystemPrice;
 use App\Models\UserAffiliateLink;
 use App\Models\UserPost;
 use App\Models\UserTelegramGroup;
+use App\Services\GeminiService;
 use App\Services\PinterestService;
+use App\Services\PollinationsService;
 use App\Services\TelegramService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class Posts extends Component
 {
-    public ?int    $selectedLinkId = null;
-    public string  $activeTab      = '';   // 'text'|'image'|'video'|'pinterest'
+    private const AI_TEXT_FREE_DAILY = 10;
+
+    public ?int    $selectedLinkId   = null;
+    public string  $activeTab        = '';   // 'text'|'image'|'video'|'pinterest'
 
     // Pinterest search
-    public string  $pinterestQuery = '';
-    public array   $pinterestPins  = [];
-    public ?string $pinterestError = null;
+    public string  $pinterestQuery   = '';
+    public array   $pinterestPins    = [];
+    public ?string $pinterestError   = null;
     public bool    $pinterestLoading = false;
 
     // General
     public ?string $flashMsg  = null;
     public ?string $error     = null;
 
-    public function mount(): void
-    {
-    }
+    public function mount(): void {}
 
+    // ── Computed ─────────────────────────────────────────────────────────────
 
     public function getLinksProperty()
     {
@@ -64,6 +68,24 @@ class Posts extends Component
             ->toArray();
     }
 
+    public function getTextDailyUsageProperty(): array
+    {
+        $count     = $this->getDailyTextCount(Auth::id());
+        $remaining = max(0, self::AI_TEXT_FREE_DAILY - $count);
+        return [
+            'count'     => $count,
+            'limit'     => self::AI_TEXT_FREE_DAILY,
+            'remaining' => $remaining,
+            'is_free'   => $remaining > 0,
+        ];
+    }
+
+    public function getTelegramGroupsProperty()
+    {
+        return UserTelegramGroup::where('user_id', Auth::id())->get();
+    }
+
+    // ── Navigation ───────────────────────────────────────────────────────────
 
     public function selectLink(int $linkId): void
     {
@@ -90,6 +112,7 @@ class Posts extends Component
         $this->activeTab     = $tab;
         $this->pinterestPins = [];
         $this->error         = null;
+        $this->flashMsg      = null;
 
         if ($tab === 'pinterest' && $this->selectedLink) {
             $this->pinterestQuery = $this->selectedLink->product_name;
@@ -104,42 +127,141 @@ class Posts extends Component
         $this->flashMsg      = null;
     }
 
+    // ── Content generation ───────────────────────────────────────────────────
+
     public function createPost(string $type): void
     {
-        $user  = Auth::user();
-        $link  = $this->selectedLink;
-        $cost  = $this->prices[$type] ?? 0;
+        $user = Auth::user();
+        $link = $this->selectedLink;
 
         if (!$link) {
             $this->error = 'Selecione um produto.';
             return;
         }
 
+        match ($type) {
+            'text'  => $this->handleTextPost($user, $link),
+            'image' => $this->handleImagePost($user, $link),
+            default => $this->handleVideoPost($user, $link, $type),
+        };
+    }
+
+    private function handleTextPost(mixed $user, UserAffiliateLink $link): void
+    {
+        $usage  = $this->textDailyUsage;
+        $isFree = $usage['is_free'];
+        $cost   = $isFree ? 0 : $this->prices['text'];
+
+        if (!$isFree && $user->tokenBalance() < $cost) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        if (!$isFree) {
+            $user->ensureTokenWallet()->debit($cost, "Texto AI — {$link->product_name}", "post:text:{$link->id}");
+        }
+
+        $post = UserPost::create([
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => 'text',
+            'status'            => 'pending',
+            'credits_charged'   => $cost,
+        ]);
+
+        $gemini = app(GeminiService::class);
+
+        if (!$gemini->isConfigured()) {
+            $this->processMock($post, $link, 'text');
+        } else {
+            $result = $gemini->generateSalesText($link->product_name, $link->price_min, $link->commission_rate);
+
+            if (isset($result['error'])) {
+                if (!$isFree) {
+                    $user->ensureTokenWallet()->credit($cost, "Reembolso Texto AI", "refund:text:{$link->id}");
+                }
+                $post->update(['status' => 'failed', 'error_message' => $result['error']]);
+                $this->error = $result['error'];
+                return;
+            }
+
+            $result['image_url'] = $link->image_url;
+            $post->update(['status' => 'completed', 'result' => $result]);
+        }
+
+        $this->incrementDailyTextCount($user->id);
+
+        $remaining = max(0, self::AI_TEXT_FREE_DAILY - $usage['count'] - 1);
+        $this->flashMsg = $isFree
+            ? "Texto gerado! ({$remaining} " . ($remaining === 1 ? 'gratuito restante' : 'gratuitos restantes') . " hoje)"
+            : 'Texto gerado com sucesso!';
+        $this->error = null;
+    }
+
+    private function handleImagePost(mixed $user, UserAffiliateLink $link): void
+    {
+        $cost = $this->prices['image'];
+
         if ($user->tokenBalance() < $cost) {
             $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
             return;
         }
 
-        $user->ensureTokenWallet()->debit(
-            $cost,
-            "Post {$type} — {$link->product_name}",
-            "post:{$type}:{$link->id}"
-        );
+        $user->ensureTokenWallet()->debit($cost, "Imagem AI — {$link->product_name}", "post:image:{$link->id}");
 
         $post = UserPost::create([
-            'user_id'          => $user->id,
-            'affiliate_link_id'=> $link->id,
-            'type'             => $type,
-            'status'           => 'pending',
-            'credits_charged'  => $cost,
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => 'image',
+            'status'            => 'pending',
+            'credits_charged'   => $cost,
         ]);
 
-        // For now: immediately mock the result (no queue)
+        $imageUrl = app(PollinationsService::class)->generate($link->product_name, $user->id);
+
+        if (!$imageUrl) {
+            // Reembolsa e marca como falha
+            $user->ensureTokenWallet()->credit($cost, "Reembolso Imagem AI", "refund:image:{$link->id}");
+            $post->update(['status' => 'failed', 'error_message' => 'Falha ao gerar imagem. Tente novamente.']);
+            $this->error = 'Falha ao gerar imagem. Tente novamente.';
+            return;
+        }
+
+        $post->update([
+            'status' => 'completed',
+            'result' => ['image_url' => $imageUrl, 'prompt' => $link->product_name],
+        ]);
+
+        $this->flashMsg = 'Imagem gerada com sucesso!';
+        $this->error    = null;
+    }
+
+    private function handleVideoPost(mixed $user, UserAffiliateLink $link, string $type): void
+    {
+        $cost = $this->prices[$type] ?? 0;
+
+        if ($user->tokenBalance() < $cost) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        $user->ensureTokenWallet()->debit($cost, "Post {$type} — {$link->product_name}", "post:{$type}:{$link->id}");
+
+        $post = UserPost::create([
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => $type,
+            'status'            => 'pending',
+            'credits_charged'   => $cost,
+        ]);
+
         $this->processMock($post, $link, $type);
 
         $this->flashMsg = 'Conteúdo gerado com sucesso!';
         $this->error    = null;
     }
+
+    // ── Pinterest ─────────────────────────────────────────────────────────────
 
     public function searchPinterest(): void
     {
@@ -164,8 +286,7 @@ class Posts extends Component
         $this->pinterestLoading = true;
         $this->pinterestError   = null;
 
-        $service = app(PinterestService::class);
-        $result  = $service->searchPins($this->pinterestQuery, 12);
+        $result = app(PinterestService::class)->searchPins($this->pinterestQuery, 12);
 
         $this->pinterestLoading = false;
 
@@ -174,12 +295,7 @@ class Posts extends Component
             return;
         }
 
-        // Debit only after successful search
-        $user->ensureTokenWallet()->debit(
-            $cost,
-            "Busca Pinterest — {$this->pinterestQuery}",
-            "post:pinterest:{$link->id}"
-        );
+        $user->ensureTokenWallet()->debit($cost, "Busca Pinterest — {$this->pinterestQuery}", "post:pinterest:{$link->id}");
 
         UserPost::create([
             'user_id'           => $user->id,
@@ -193,11 +309,7 @@ class Posts extends Component
         $this->pinterestPins = $result['pins'];
     }
 
-
-    public function getTelegramGroupsProperty()
-    {
-        return UserTelegramGroup::where('user_id', Auth::id())->get();
-    }
+    // ── Telegram ──────────────────────────────────────────────────────────────
 
     public function sendToTelegram(int $postId, int $groupId): void
     {
@@ -243,17 +355,29 @@ class Posts extends Component
         }
     }
 
+    // ── Daily limit helpers ───────────────────────────────────────────────────
+
+    private function getDailyTextCount(int $userId): int
+    {
+        return (int) Cache::get("ai_text_count:{$userId}:" . now()->format('Y-m-d'), 0);
+    }
+
+    private function incrementDailyTextCount(int $userId): void
+    {
+        $key     = "ai_text_count:{$userId}:" . now()->format('Y-m-d');
+        $current = (int) Cache::get($key, 0);
+        Cache::put($key, $current + 1, now()->endOfDay()->addHour());
+    }
+
+    // ── Mock fallback (video only) ────────────────────────────────────────────
+
     private function processMock(UserPost $post, UserAffiliateLink $link, string $type): void
     {
         $result = match ($type) {
             'text' => [
                 'title'       => "🔥 {$link->product_name} — Melhor oferta!",
-                'description' => "Aproveite essa oportunidade incrível! Adquira {$link->product_name} com comissão garantida. Link de afiliado: {$link->affiliate_link}",
+                'description' => "Aproveite essa oportunidade incrível! Adquira {$link->product_name} com comissão garantida.",
                 'image_url'   => $link->image_url,
-            ],
-            'image' => [
-                'image_url' => "https://via.placeholder.com/800x800/EE4D2D/ffffff?text=" . urlencode(substr($link->product_name, 0, 20)),
-                'prompt'    => "Imagem promocional para {$link->product_name}",
             ],
             'video' => [
                 'video_url' => 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
@@ -264,7 +388,6 @@ class Posts extends Component
 
         $post->update(['status' => 'completed', 'result' => $result]);
     }
-
 
     public function render()
     {

@@ -38,6 +38,10 @@ return [
         'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5-20251001'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
     'telegram' => [
         'bot_token'      => env('TELEGRAM_BOT_TOKEN'),
         'bot_username'   => env('TELEGRAM_BOT_USERNAME'),
