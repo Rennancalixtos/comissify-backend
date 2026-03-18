@@ -9,7 +9,8 @@
         <div class="alert-success mb-4">{{ session('price_saved') }}</div>
         @endif
 
-        <div class="grid sm:grid-cols-2 gap-4 mb-4">
+        <p class="text-xs text-d-muted mb-3">Busca e links</p>
+        <div class="grid sm:grid-cols-2 gap-4 mb-5">
             <div>
                 <label class="block text-xs text-d-muted mb-1.5">Custo por busca (R$)</label>
                 <input wire:model="priceSearch" type="number" step="0.000001" min="0" class="form-input w-full"/>
@@ -19,6 +20,31 @@
                 <input wire:model="priceLink" type="number" step="0.000001" min="0" class="form-input w-full"/>
             </div>
         </div>
+
+        <p class="text-xs text-d-muted mb-3">Criador de conteúdo</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Texto AI — após 10 gratuitos (R$)</label>
+                <input wire:model="pricePostText" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Imagem com IA (R$)</label>
+                <input wire:model="pricePostImage" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Vídeo de Venda (R$)</label>
+                <input wire:model="pricePostVideo" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Busca Pinterest (R$)</label>
+                <input wire:model="pricePostPin" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Envio Telegram por grupo (R$)</label>
+                <input wire:model="pricePostTg" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+        </div>
+
         <button wire:click="savePrices" class="btn-primary !py-2 !px-5">Salvar preços</button>
     </div>
 

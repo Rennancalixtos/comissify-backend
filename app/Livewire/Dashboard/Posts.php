@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Jobs\SendTelegramMessage;
 use App\Models\SystemPrice;
 use App\Models\UserAffiliateLink;
 use App\Models\UserPost;
@@ -19,7 +20,10 @@ class Posts extends Component
     private const AI_TEXT_FREE_DAILY = 10;
 
     public ?int    $selectedLinkId   = null;
-    public string  $activeTab        = '';   // 'text'|'image'|'video'|'pinterest'
+    public string  $activeTab        = '';   // 'text'|'image'|'video'|'pinterest'|'telegram'
+
+    // Telegram broadcast
+    public array   $selectedGroupIds  = [];
 
     // Pinterest search
     public string  $pinterestQuery   = '';
@@ -56,6 +60,7 @@ class Posts extends Component
             'image'     => SystemPrice::get('post_image_cost'),
             'video'     => SystemPrice::get('post_video_cost'),
             'pinterest' => SystemPrice::get('post_pinterest_cost'),
+            'telegram'  => SystemPrice::get('post_telegram_cost'),
         ];
     }
 
@@ -89,30 +94,33 @@ class Posts extends Component
 
     public function selectLink(int $linkId): void
     {
-        $this->selectedLinkId = $linkId;
-        $this->activeTab      = '';
-        $this->pinterestPins  = [];
-        $this->pinterestQuery = '';
-        $this->error          = null;
-        $this->flashMsg       = null;
+        $this->selectedLinkId   = $linkId;
+        $this->activeTab        = '';
+        $this->pinterestPins    = [];
+        $this->pinterestQuery   = '';
+        $this->selectedGroupIds = [];
+        $this->error            = null;
+        $this->flashMsg         = null;
     }
 
     public function clearProduct(): void
     {
-        $this->selectedLinkId = null;
-        $this->activeTab      = '';
-        $this->pinterestPins  = [];
-        $this->pinterestQuery = '';
-        $this->error          = null;
-        $this->flashMsg       = null;
+        $this->selectedLinkId   = null;
+        $this->activeTab        = '';
+        $this->pinterestPins    = [];
+        $this->pinterestQuery   = '';
+        $this->selectedGroupIds = [];
+        $this->error            = null;
+        $this->flashMsg         = null;
     }
 
     public function selectTab(string $tab): void
     {
-        $this->activeTab     = $tab;
-        $this->pinterestPins = [];
-        $this->error         = null;
-        $this->flashMsg      = null;
+        $this->activeTab        = $tab;
+        $this->pinterestPins    = [];
+        $this->selectedGroupIds = [];
+        $this->error            = null;
+        $this->flashMsg         = null;
 
         if ($tab === 'pinterest' && $this->selectedLink) {
             $this->pinterestQuery = $this->selectedLink->product_name;
@@ -121,10 +129,11 @@ class Posts extends Component
 
     public function clearTab(): void
     {
-        $this->activeTab     = '';
-        $this->pinterestPins = [];
-        $this->error         = null;
-        $this->flashMsg      = null;
+        $this->activeTab        = '';
+        $this->pinterestPins    = [];
+        $this->selectedGroupIds = [];
+        $this->error            = null;
+        $this->flashMsg         = null;
     }
 
     // ── Content generation ───────────────────────────────────────────────────
@@ -309,7 +318,59 @@ class Posts extends Component
         $this->pinterestPins = $result['pins'];
     }
 
-    // ── Telegram ──────────────────────────────────────────────────────────────
+    // ── Telegram broadcast ────────────────────────────────────────────────────
+
+    public function broadcastTelegram(): void
+    {
+        $user = Auth::user();
+        $link = $this->selectedLink;
+
+        if (!$link) {
+            $this->error = 'Selecione um produto primeiro.';
+            return;
+        }
+
+        if (empty($this->selectedGroupIds)) {
+            $this->error = 'Selecione ao menos um grupo.';
+            return;
+        }
+
+        $groups = UserTelegramGroup::where('user_id', $user->id)
+            ->whereIn('id', $this->selectedGroupIds)
+            ->get();
+
+        if ($groups->isEmpty()) {
+            $this->error = 'Nenhum grupo válido selecionado.';
+            return;
+        }
+
+        $costPerGroup = $this->prices['telegram'];
+        $total        = $costPerGroup * $groups->count();
+
+        if ($user->tokenBalance() < $total) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($total, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        $user->ensureTokenWallet()->debit(
+            $total,
+            "Envio Telegram — {$link->product_name} ({$groups->count()} grupos)",
+            "post:telegram:{$link->id}"
+        );
+
+        foreach ($groups as $i => $group) {
+            // 1 segundo de intervalo entre envios para respeitar rate limit do Telegram
+            SendTelegramMessage::dispatch($group->id, $link->id)
+                ->delay(now()->addSeconds($i));
+        }
+
+        $count          = $groups->count();
+        $this->flashMsg = "Enviando para {$count} " . ($count === 1 ? 'grupo' : 'grupos') . '!';
+        $this->error    = null;
+        $this->selectedGroupIds = [];
+    }
+
+    // ── Telegram (post card send) ─────────────────────────────────────────────
 
     public function sendToTelegram(int $postId, int $groupId): void
     {

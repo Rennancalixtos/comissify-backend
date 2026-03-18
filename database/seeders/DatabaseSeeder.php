@@ -74,6 +74,10 @@ class DatabaseSeeder extends Seeder
             'value'       => 0.100000,
             'description' => 'Custo por busca no Pinterest',
         ]);
+        SystemPrice::updateOrCreate(['key' => 'post_telegram_cost'], [
+            'value'       => 0.010000,
+            'description' => 'Custo por envio Telegram (por grupo)',
+        ]);
 
         \App\Models\Setting::updateOrCreate(['key' => 'theme_color'], [
             'value'       => 'purple',

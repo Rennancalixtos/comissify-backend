@@ -37,6 +37,15 @@
             'icon'  => 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z',
             'soon'  => false,
         ],
+        [
+            'key'   => 'telegram',
+            'label' => 'Enviar no Telegram',
+            'desc'  => 'Envia o produto direto para um ou vários grupos do Telegram usando o template configurado. Ideal para divulgação em massa.',
+            'cost'  => $this->prices['telegram'],
+            'color' => '#2AABEE',
+            'icon'  => 'M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z',
+            'soon'  => false,
+        ],
     ];
 @endphp
 
@@ -295,6 +304,8 @@
                         @else
                         <p class="text-xs text-d-muted">Cota gratuita esgotada · R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por geração</p>
                         @endif
+                    @elseif($activeTab === 'telegram')
+                        <p class="text-xs text-d-muted">R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por grupo</p>
                     @else
                         <p class="text-xs text-d-muted">R$ {{ number_format($activeTool['cost'], 2, ',', '.') }} por geração</p>
                     @endif
@@ -319,6 +330,51 @@
         </div>
         @if($pinterestError)
         <p class="text-xs text-red-400">{{ $pinterestError }}</p>
+        @endif
+        @elseif($activeTab === 'telegram')
+        {{-- Seleção de grupos --}}
+        @php $groups = $this->telegramGroups; @endphp
+        @if($groups->isEmpty())
+        <div class="text-center py-4">
+            <p class="text-sm text-d-muted mb-3">Nenhum grupo conectado.</p>
+            <a href="{{ route('channels') }}" class="btn-primary !text-xs !py-2 !px-4">Conectar grupo →</a>
+        </div>
+        @else
+        <div class="space-y-2">
+            <p class="text-xs text-d-muted mb-2">Selecione os grupos de destino:</p>
+            @foreach($groups as $group)
+            <label class="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors"
+                   style="background:#272727;border:1px solid #2A2A2A">
+                <input type="checkbox" wire:model="selectedGroupIds" value="{{ $group->id }}"
+                       class="w-4 h-4 rounded accent-[color:var(--color-primary)]"/>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-d-text truncate">{{ $group->chat_title }}</p>
+                    <p class="text-xs text-d-muted">ID {{ $group->chat_id }}</p>
+                </div>
+            </label>
+            @endforeach
+        </div>
+
+        @if(!empty($selectedGroupIds))
+        @php $selectedCount = count($selectedGroupIds); $totalCost = $selectedCount * $activeTool['cost']; @endphp
+        <div class="flex items-center justify-between px-3 py-2 rounded-lg" style="background:rgba(42,171,238,.08);border:1px solid rgba(42,171,238,.2)">
+            <span class="text-xs" style="color:#2AABEE">{{ $selectedCount }} {{ $selectedCount === 1 ? 'grupo' : 'grupos' }} selecionado{{ $selectedCount > 1 ? 's' : '' }}</span>
+            <span class="text-xs font-bold" style="color:#2AABEE">R$ {{ number_format($totalCost, 2, ',', '.') }}</span>
+        </div>
+        @endif
+
+        <button wire:click="broadcastTelegram" wire:loading.attr="disabled"
+                @if(empty($selectedGroupIds)) disabled @endif
+                class="btn-primary w-full justify-center"
+                style="{{ empty($selectedGroupIds) ? 'opacity:.5;cursor:not-allowed' : '' }}">
+            <span wire:loading.remove wire:target="broadcastTelegram">
+                <svg class="w-4 h-4 mr-1.5 inline-block" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                </svg>
+                Enviar para Telegram
+            </span>
+            <span wire:loading wire:target="broadcastTelegram">Enviando...</span>
+        </button>
         @endif
         @else
         <button wire:click="createPost('{{ $activeTab }}')" wire:loading.attr="disabled"
