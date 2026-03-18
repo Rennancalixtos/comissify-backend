@@ -345,7 +345,7 @@
             @foreach($groups as $group)
             <label class="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors"
                    style="background:#272727;border:1px solid #2A2A2A">
-                <input type="checkbox" wire:model="selectedGroupIds" value="{{ $group->id }}"
+                <input type="checkbox" wire:model.live="selectedGroupIds" value="{{ $group->id }}"
                        class="w-4 h-4 rounded accent-[color:var(--color-primary)]"/>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-d-text truncate">{{ $group->chat_title }}</p>
