@@ -119,6 +119,18 @@ class MercadoPagoWebhookController extends Controller
         $signed   = "id:{$dataId};request-id:{$xRequestId};ts:{$ts}";
         $expected = hash_hmac('sha256', $signed, $secret);
 
+        // DEBUG TEMPORÁRIO — remover após resolver
+        Log::debug('MP Webhook signature debug', [
+            'x-signature'  => $xSignature,
+            'x-request-id' => $xRequestId,
+            'data_id'      => $dataId,
+            'ts'           => $ts,
+            'signed'       => $signed,
+            'expected'     => $expected,
+            'received'     => $hash,
+            'match'        => hash_equals($expected, $hash),
+        ]);
+
         return hash_equals($expected, $hash);
     }
 }
