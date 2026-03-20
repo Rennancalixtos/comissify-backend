@@ -14,8 +14,8 @@ class MercadoPagoWebhookController extends Controller
     public function handle(Request $request): Response
     {
         if (!$this->verifySignature($request)) {
-            // TODO: bloquear após confirmar algoritmo correto do MP
-            Log::warning('MP Webhook: assinatura inválida (não bloqueando)', ['ip' => $request->ip()]);
+            Log::warning('MP Webhook: assinatura inválida', ['ip' => $request->ip()]);
+            return response('unauthorized', 401);
         }
 
         // MP envia type=payment para notificações de pagamento
@@ -120,17 +120,6 @@ class MercadoPagoWebhookController extends Controller
         $signed   = "id:{$dataId};request-id:{$xRequestId};ts:{$ts}";
         $expected = hash_hmac('sha256', $signed, $secret);
 
-        $match = hash_equals($expected, $hash);
-
-        if (!$match) {
-            Log::warning('MP Webhook: signed string debug', [
-                'data_id'   => $dataId,
-                'signed'    => $signed,
-                'expected'  => $expected,
-                'received'  => $hash,
-            ]);
-        }
-
-        return $match;
+        return hash_equals($expected, $hash);
     }
 }
