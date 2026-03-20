@@ -9,17 +9,6 @@ use Symfony\Component\Process\Process;
 
 class DownloadProxyController extends Controller
 {
-    // Private/internal IP ranges that must never be proxied (SSRF protection)
-    private const BLOCKED_CIDRS = [
-        '10.0.0.0/8',
-        '172.16.0.0/12',
-        '192.168.0.0/16',
-        '127.0.0.0/8',
-        '169.254.0.0/16', // link-local
-        '::1/128',        // IPv6 loopback
-        'fc00::/7',       // IPv6 ULA
-    ];
-
     public function download(Request $request)
     {
         $url = $request->query('url');
@@ -72,7 +61,7 @@ class DownloadProxyController extends Controller
 
     private function downloadWithYtdlp(string $url, string $filename): \Symfony\Component\HttpFoundation\Response
     {
-        $ytdlp  = env('YTDLP_PATH', '/usr/local/bin/yt-dlp');
+        $ytdlp  = config('services.ytdlp.path');
         $tmpOut = sys_get_temp_dir() . '/' . uniqid('media_') . '.mp4';
 
         $process = new Process([

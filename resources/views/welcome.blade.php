@@ -160,8 +160,17 @@
                class="hidden sm:flex items-center gap-1 text-sm font-display font-semibold nav-glow-pulse">
                 💰 Maior comissão
             </a>
-            <a href="{{ route('login') }}" class="btn-secondary !py-1.5 !px-4 text-sm">Entrar</a>
-            <a href="{{ route('register') }}" class="btn-primary !py-1.5 !px-4 text-sm">Começar grátis</a>
+            @auth
+                @php
+                    $dashRoute = auth()->user()->is_admin
+                        ? route('admin.dashboard')
+                        : (auth()->user()->isShopeeConnected() ? route('dashboard') : route('connect'));
+                @endphp
+                <a href="{{ $dashRoute }}" class="btn-primary !py-1.5 !px-4 text-sm">Ir para o Dashboard</a>
+            @else
+                <a href="{{ route('login') }}" class="btn-secondary !py-1.5 !px-4 text-sm">Entrar</a>
+                <a href="{{ route('register') }}" class="btn-primary !py-1.5 !px-4 text-sm">Começar grátis</a>
+            @endauth
         </div>
     </div>
 </nav>

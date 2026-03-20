@@ -124,10 +124,25 @@ class Register extends Component
             return;
         }
 
-        if (!Hash::check($code, $codeHash)) {
-            $this->otpError = 'Código incorreto. Verifique e tente novamente.';
+        $attemptsKey = "register_otp_attempts:{$this->email}";
+        $attempts    = (int) Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            $this->otpError = 'Muitas tentativas incorretas. Solicite um novo código.';
+            Cache::forget("register_otp:{$this->email}");
+            Cache::forget($attemptsKey);
+            $this->canResend = true;
             return;
         }
+
+        if (!Hash::check($code, $codeHash)) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(15));
+            $remaining = 4 - $attempts;
+            $this->otpError = "Código incorreto. {$remaining} tentativa(s) restante(s).";
+            return;
+        }
+
+        Cache::forget($attemptsKey);
 
         $data = Cache::get("register_data:{$this->email}");
 

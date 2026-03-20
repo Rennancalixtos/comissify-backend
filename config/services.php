@@ -19,6 +19,10 @@ return [
         'scraper_key' => env('PINTEREST_SCRAPER_KEY'),
     ],
 
+    'ytdlp' => [
+        'path' => env('YTDLP_PATH', '/usr/local/bin/yt-dlp'),
+    ],
+
     'shopee' => [
         'app_id'              => env('SHOPEE_APP_ID'),
         'secret'              => env('SHOPEE_SECRET'),
