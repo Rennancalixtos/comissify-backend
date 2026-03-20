@@ -15,8 +15,12 @@
     <meta property="og:url" content="{{ config('app.url') }}">
     <meta property="og:title" content="Comissify — Link Afiliado Shopee em 1 Clique">
     <meta property="og:description" content="Encontre produtos com alta comissão, gere links e compartilhe em segundos. Teste grátis com R$ 5,00 em créditos.">
+    <meta property="og:image" content="{{ config('app.url') }}/images/og-comissify.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="pt_BR">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ config('app.url') }}/images/og-comissify.png">
 
     {{-- JSON-LD --}}
     <script type="application/ld+json">
@@ -39,40 +43,6 @@
             "@type": "Audience",
             "audienceType": "Afiliados Shopee"
         }
-    }
-    </script>
-
-    {{-- FAQ Schema --}}
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "O que são créditos?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Créditos são o saldo da sua conta, usado para realizar buscas de produtos e gerar links afiliados. Cada busca consome R$ 0,02 em créditos, garantindo uso justo da plataforma."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Preciso ser aprovado no programa de afiliados da Shopee?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Sim. Para usar o Comissify, você precisa já participar do Programa de Afiliados Shopee e ter solicitado a liberação de acesso à API diretamente no app da Shopee."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Como conecto minha conta Shopee?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Após criar sua conta no Comissify, você será direcionado para uma tela de conexão onde inserirá seu App ID e sua Chave de acesso fornecidos pela Shopee."
-                }
-            }
-        ]
     }
     </script>
 
@@ -159,6 +129,14 @@
             <a href="{{ route('commissions') }}"
                class="hidden sm:flex items-center gap-1 text-sm font-display font-semibold nav-glow-pulse">
                 💰 Maior comissão
+            </a>
+            <a href="{{ route('blog.index') }}"
+               class="hidden sm:flex items-center gap-1 text-sm font-display font-semibold text-d-muted hover:text-d-text transition-colors">
+                Blog
+            </a>
+            <a href="{{ route('faq') }}"
+               class="hidden sm:flex items-center gap-1 text-sm font-display font-semibold text-d-muted hover:text-d-text transition-colors">
+                FAQ
             </a>
             @auth
                 @php
@@ -443,43 +421,18 @@
 </section>
 @endif
 
-{{-- ── FAQ ────────────────────────────────────────────────────────────── --}}
-<section class="py-24" style="background:#0f0f0f">
-    <div class="max-w-2xl mx-auto px-6">
-        <div class="text-center mb-12">
-            <p class="text-xs uppercase tracking-widest font-display mb-3" style="color:var(--color-primary)">FAQ</p>
-            <h2 class="font-display text-3xl font-bold text-d-text">Perguntas frequentes</h2>
-        </div>
-        <div class="space-y-3" x-data="{ open: null }">
-            @foreach([
-                ['q' => 'O que são créditos?', 'a' => 'Créditos são o saldo da sua conta, usado para realizar buscas de produtos e gerar links afiliados. Cada busca consome R$ 0,02 em créditos, garantindo uso justo da plataforma.'],
-                ['q' => 'Preciso ser aprovado no programa de afiliados da Shopee?', 'a' => 'Sim. Para usar o Comissify, você precisa já participar do Programa de Afiliados Shopee e ter solicitado a liberação de acesso à API diretamente no app da Shopee. Sem essa aprovação, não é possível conectar.'],
-                ['q' => 'Como conecto minha conta Shopee?', 'a' => 'Após criar sua conta no Comissify, você será direcionado para uma tela de conexão onde inserirá seu App ID e sua Chave de acesso (fornecidos pela Shopee ao liberar a API). A validação é feita automaticamente.'],
-                ['q' => 'Como funciona a cobrança?', 'a' => 'Você compra pacotes de créditos e usa conforme necessário. Não há assinatura mensal — você paga apenas o que usar.'],
-                ['q' => 'Posso cancelar a qualquer momento?', 'a' => 'Sim. Não há fidelidade. Seus créditos não expiram e você pode parar de usar quando quiser.'],
-            ] as $i => $faq)
-            <div class="rounded-xl overflow-hidden border border-d-border" style="background:#1A1A1A">
-                <button type="button" @click="open === {{ $i }} ? open = null : open = {{ $i }}"
-                        class="w-full text-left px-5 py-4 flex items-center justify-between gap-4">
-                    <span class="font-medium text-d-text text-sm font-display">{{ $faq['q'] }}</span>
-                    <svg class="w-4 h-4 text-d-muted flex-shrink-0 transition-transform duration-200" :class="open === {{ $i }} && 'rotate-180'"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                <div x-show="open === {{ $i }}"
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 -translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0"
-                     style="display:none">
-                    <div class="px-5 pb-4 text-sm text-d-muted border-t border-d-border pt-4 leading-relaxed">{{ $faq['a'] }}</div>
-                </div>
-            </div>
-            @endforeach
-        </div>
+{{-- ── Dúvidas / FAQ teaser ─────────────────────────────────────────────── --}}
+<section class="py-14 border-t border-d-border" style="background:#0f0f0f">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+        <p class="text-d-muted text-sm mb-3">Ainda tem dúvidas sobre como funciona?</p>
+        <a href="{{ route('faq') }}"
+           class="inline-flex items-center gap-2 font-display font-semibold text-sm transition-colors hover:opacity-80"
+           style="color:var(--color-primary)">
+            Veja as perguntas frequentes
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+        </a>
     </div>
 </section>
 
@@ -515,9 +468,10 @@
             <span class="text-xs text-d-muted ml-1">— Link afiliado Shopee automático</span>
         </div>
         <div class="flex items-center gap-5 text-xs text-d-muted">
+            <a href="{{ route('blog.index') }}" class="hover:text-d-text transition-colors">Blog</a>
+            <a href="{{ route('faq') }}" class="hover:text-d-text transition-colors">FAQ</a>
             <a href="{{ route('terms') }}" class="hover:text-d-text transition-colors">Termos de uso</a>
             <a href="{{ route('privacy') }}" class="hover:text-d-text transition-colors">Privacidade</a>
-            <a href="#" class="hover:text-d-text transition-colors">Contato</a>
         </div>
     </div>
 </footer>

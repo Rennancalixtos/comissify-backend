@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /posts
+Disallow: /canais
+Disallow: /relatorio
+Disallow: /creditos
+Disallow: /connect
+Disallow: /checkout/
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://comissify.shop/sitemap.xml
