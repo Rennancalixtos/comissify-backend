@@ -8,6 +8,31 @@ Route::get('/tendencias',      [\App\Http\Controllers\TrendingController::class,
 Route::get('/maiores-comissoes', [\App\Http\Controllers\TrendingController::class, 'commissions'])->name('commissions');
 Route::get('/privacidade',     fn() => view('privacy'))->name('privacy');
 Route::get('/termos',          fn() => view('terms'))->name('terms');
+Route::get('/faq',             fn() => view('faq'))->name('faq');
+Route::get('/blog',            [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}',     [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+
+// ─── Sitemap ──────────────────────────────────────────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $trending    = \Illuminate\Support\Facades\Cache::get('trending_products_updated_at');
+    $trendingMod = $trending ? \Carbon\Carbon::parse($trending)->toDateString() : now()->toDateString();
+
+    $urls = [
+        ['loc' => url('/'),                    'lastmod' => now()->toDateString(),  'changefreq' => 'daily',   'priority' => '1.0'],
+        ['loc' => route('trending'),           'lastmod' => $trendingMod,           'changefreq' => 'hourly',  'priority' => '0.9'],
+        ['loc' => route('commissions'),        'lastmod' => $trendingMod,           'changefreq' => 'hourly',  'priority' => '0.9'],
+        ['loc' => route('faq'),                'lastmod' => '2025-03-10',           'changefreq' => 'monthly', 'priority' => '0.6'],
+        ['loc' => route('blog.index'),         'lastmod' => '2025-03-17',           'changefreq' => 'weekly',  'priority' => '0.7'],
+        ['loc' => route('blog.show', 'como-gerar-link-afiliado-shopee'),           'lastmod' => '2025-03-10', 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => route('blog.show', 'como-encontrar-produtos-maior-comissao-shopee'), 'lastmod' => '2025-03-17', 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => route('privacy'),            'lastmod' => '2025-01-01',           'changefreq' => 'monthly', 'priority' => '0.2'],
+        ['loc' => route('terms'),              'lastmod' => '2025-01-01',           'changefreq' => 'monthly', 'priority' => '0.2'],
+    ];
+
+    return response()
+        ->view('sitemap', compact('urls'))
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');

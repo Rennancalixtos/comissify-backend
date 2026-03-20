@@ -13,7 +13,34 @@
     <meta property="og:url" content="{{ route($routeName) }}">
     <meta property="og:title" content="{{ $metaTitle }}">
     <meta property="og:description" content="{{ $metaDesc }}">
+    <meta property="og:image" content="{{ config('app.url') }}/images/og-comissify.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ config('app.url') }}/images/og-comissify.png">
+
+    {{-- BreadcrumbList --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Início",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ $pageTitle }}",
+                "item": "{{ route($routeName) }}"
+            }
+        ]
+    }
+    </script>
 
     @if($products)
     <script type="application/ld+json">
@@ -102,6 +129,8 @@
                style="{{ $routeName === 'commissions' ? 'color:var(--color-primary)' : '' }}">
                 💰 Maior comissão
             </a>
+            <a href="{{ route('blog.index') }}" class="text-d-muted hover:text-d-text transition-colors font-normal">Blog</a>
+            <a href="{{ route('faq') }}" class="text-d-muted hover:text-d-text transition-colors font-normal">FAQ</a>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('login') }}" class="btn-secondary !py-1.5 !px-4 text-sm">Entrar</a>
@@ -253,6 +282,8 @@
         </div>
         <div class="flex items-center gap-5 text-xs text-d-muted">
             <a href="{{ route('home') }}" class="hover:text-d-text transition-colors">Início</a>
+            <a href="{{ route('blog.index') }}" class="hover:text-d-text transition-colors">Blog</a>
+            <a href="{{ route('faq') }}" class="hover:text-d-text transition-colors">FAQ</a>
             <a href="{{ route('terms') }}" class="hover:text-d-text transition-colors">Termos de uso</a>
             <a href="{{ route('privacy') }}" class="hover:text-d-text transition-colors">Privacidade</a>
         </div>
