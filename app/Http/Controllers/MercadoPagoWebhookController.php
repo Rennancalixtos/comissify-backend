@@ -102,7 +102,8 @@ class MercadoPagoWebhookController extends Controller
         $xSignature = $request->header('x-signature', '');
         $xRequestId = $request->header('x-request-id', '');
         // MP envia data.id na query string (PHP converte para data_id) OU no body JSON
-        $dataId     = (string) ($request->query('data_id') ?? $request->json('data.id') ?? $request->json('id') ?? '');
+        // input() suporta dot notation em objetos aninhados, json() não
+        $dataId     = (string) ($request->query('data_id') ?? $request->input('data.id') ?? '');
 
         // Extrai ts e v1 do header x-signature
         $ts   = '';
