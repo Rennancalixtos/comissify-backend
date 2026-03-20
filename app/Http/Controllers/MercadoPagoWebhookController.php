@@ -103,6 +103,14 @@ class MercadoPagoWebhookController extends Controller
         $xRequestId = $request->header('x-request-id', '');
         $dataId     = $request->query('data_id') ?? $request->input('data.id', '');
 
+        // DEBUG TEMPORÁRIO — remover após resolver
+        Log::warning('MP Webhook headers debug', [
+            'x-signature'  => $xSignature,
+            'x-request-id' => $xRequestId,
+            'data_id'      => $dataId,
+            'all_headers'  => $request->headers->all(),
+        ]);
+
         // Extrai ts e v1 do header x-signature
         $ts   = '';
         $hash = '';
@@ -118,18 +126,6 @@ class MercadoPagoWebhookController extends Controller
 
         $signed   = "id:{$dataId};request-id:{$xRequestId};ts:{$ts}";
         $expected = hash_hmac('sha256', $signed, $secret);
-
-        // DEBUG TEMPORÁRIO — remover após resolver
-        Log::debug('MP Webhook signature debug', [
-            'x-signature'  => $xSignature,
-            'x-request-id' => $xRequestId,
-            'data_id'      => $dataId,
-            'ts'           => $ts,
-            'signed'       => $signed,
-            'expected'     => $expected,
-            'received'     => $hash,
-            'match'        => hash_equals($expected, $hash),
-        ]);
 
         return hash_equals($expected, $hash);
     }
