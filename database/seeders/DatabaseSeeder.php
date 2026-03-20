@@ -78,6 +78,18 @@ class DatabaseSeeder extends Seeder
             'value'       => 0.010000,
             'description' => 'Custo por envio Telegram (por grupo)',
         ]);
+        SystemPrice::updateOrCreate(['key' => 'post_tiktok_cost'], [
+            'value'       => 1.000000,
+            'description' => 'Custo por busca de vídeos no TikTok',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'post_tiktok_shop_cost'], [
+            'value'       => 1.000000,
+            'description' => 'Custo por busca de produtos no TikTok Shop',
+        ]);
+        SystemPrice::updateOrCreate(['key' => 'post_fb_adlibrary_cost'], [
+            'value'       => 1.000000,
+            'description' => 'Custo por busca na Facebook Ad Library',
+        ]);
 
         \App\Models\Setting::updateOrCreate(['key' => 'theme_color'], [
             'value'       => 'purple',

@@ -19,6 +19,10 @@ return [
         'scraper_key' => env('PINTEREST_SCRAPER_KEY'),
     ],
 
+    'scrapecreators' => [
+        'key' => env('SCRAPECREATORS_API_KEY', env('PINTEREST_SCRAPER_KEY')),
+    ],
+
     'ytdlp' => [
         'path' => env('YTDLP_PATH', '/usr/local/bin/yt-dlp'),
     ],

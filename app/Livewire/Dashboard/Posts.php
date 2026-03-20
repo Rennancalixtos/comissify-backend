@@ -7,10 +7,13 @@ use App\Models\SystemPrice;
 use App\Models\UserAffiliateLink;
 use App\Models\UserPost;
 use App\Models\UserTelegramGroup;
+use App\Services\FacebookAdLibraryService;
 use App\Services\GeminiService;
 use App\Services\PinterestService;
 use App\Services\PollinationsService;
 use App\Services\TelegramService;
+use App\Services\TikTokService;
+use App\Services\TikTokShopService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
@@ -20,7 +23,7 @@ class Posts extends Component
     private const AI_TEXT_FREE_DAILY = 10;
 
     public ?int    $selectedLinkId   = null;
-    public string  $activeTab        = '';   // 'text'|'image'|'video'|'pinterest'|'telegram'
+    public string  $activeTab        = '';   // 'text'|'image'|'video'|'pinterest'|'tiktok'|'tiktok_shop'|'fb_adlibrary'|'telegram'
 
     // Telegram broadcast
     public array   $selectedGroupIds  = [];
@@ -30,6 +33,21 @@ class Posts extends Component
     public array   $pinterestPins    = [];
     public ?string $pinterestError   = null;
     public bool    $pinterestLoading = false;
+
+    // TikTok search
+    public string  $tiktokQuery   = '';
+    public array   $tiktokResults = [];
+    public ?string $tiktokError   = null;
+
+    // TikTok Shop search
+    public string  $tiktokShopQuery   = '';
+    public array   $tiktokShopResults = [];
+    public ?string $tiktokShopError   = null;
+
+    // Facebook Ad Library search
+    public string  $fbAdQuery   = '';
+    public array   $fbAdResults = [];
+    public ?string $fbAdError   = null;
 
     // General
     public ?string $flashMsg  = null;
@@ -56,11 +74,14 @@ class Posts extends Component
     public function getPricesProperty(): array
     {
         return [
-            'text'      => SystemPrice::get('post_text_cost'),
-            'image'     => SystemPrice::get('post_image_cost'),
-            'video'     => SystemPrice::get('post_video_cost'),
-            'pinterest' => SystemPrice::get('post_pinterest_cost'),
-            'telegram'  => SystemPrice::get('post_telegram_cost'),
+            'text'        => SystemPrice::get('post_text_cost'),
+            'image'       => SystemPrice::get('post_image_cost'),
+            'video'       => SystemPrice::get('post_video_cost'),
+            'pinterest'   => SystemPrice::get('post_pinterest_cost'),
+            'telegram'    => SystemPrice::get('post_telegram_cost'),
+            'tiktok'      => SystemPrice::get('post_tiktok_cost'),
+            'tiktok_shop' => SystemPrice::get('post_tiktok_shop_cost'),
+            'fb_adlibrary'=> SystemPrice::get('post_fb_adlibrary_cost'),
         ];
     }
 
@@ -96,44 +117,70 @@ class Posts extends Component
     {
         $this->selectedLinkId   = $linkId;
         $this->activeTab        = '';
-        $this->pinterestPins    = [];
-        $this->pinterestQuery   = '';
         $this->selectedGroupIds = [];
         $this->error            = null;
         $this->flashMsg         = null;
+        $this->resetSearchState();
     }
 
     public function clearProduct(): void
     {
         $this->selectedLinkId   = null;
         $this->activeTab        = '';
-        $this->pinterestPins    = [];
-        $this->pinterestQuery   = '';
         $this->selectedGroupIds = [];
         $this->error            = null;
         $this->flashMsg         = null;
+        $this->resetSearchState();
     }
 
     public function selectTab(string $tab): void
     {
         $this->activeTab        = $tab;
-        $this->pinterestPins    = [];
         $this->selectedGroupIds = [];
         $this->error            = null;
         $this->flashMsg         = null;
+        $this->resetSearchState();
 
-        if ($tab === 'pinterest' && $this->selectedLink) {
-            $this->pinterestQuery = $this->selectedLink->product_name;
-        }
+        $productName  = $this->selectedLink?->product_name ?? '';
+        $shortKeyword = $this->extractKeyword($productName, 6);
+        match ($tab) {
+            'pinterest'    => $this->pinterestQuery  = $productName,
+            'tiktok'       => $this->tiktokQuery     = $shortKeyword,
+            'tiktok_shop'  => $this->tiktokShopQuery = $shortKeyword,
+            'fb_adlibrary' => $this->fbAdQuery       = $shortKeyword,
+            default        => null,
+        };
     }
 
     public function clearTab(): void
     {
         $this->activeTab        = '';
-        $this->pinterestPins    = [];
         $this->selectedGroupIds = [];
         $this->error            = null;
         $this->flashMsg         = null;
+        $this->resetSearchState();
+    }
+
+    private function extractKeyword(string $name, int $wordLimit): string
+    {
+        $words = preg_split('/\s+/', trim($name));
+        return implode(' ', array_slice($words, 0, $wordLimit));
+    }
+
+    private function resetSearchState(): void
+    {
+        $this->pinterestPins    = [];
+        $this->pinterestQuery   = '';
+        $this->pinterestError   = null;
+        $this->tiktokResults    = [];
+        $this->tiktokQuery      = '';
+        $this->tiktokError      = null;
+        $this->tiktokShopResults= [];
+        $this->tiktokShopQuery  = '';
+        $this->tiktokShopError  = null;
+        $this->fbAdResults      = [];
+        $this->fbAdQuery        = '';
+        $this->fbAdError        = null;
     }
 
     // ── Content generation ───────────────────────────────────────────────────
@@ -316,6 +363,129 @@ class Posts extends Component
         ]);
 
         $this->pinterestPins = $result['pins'];
+    }
+
+    // ── TikTok ───────────────────────────────────────────────────────────────
+
+    public function searchTiktok(): void
+    {
+        $user = Auth::user();
+        $link = $this->selectedLink;
+        $cost = $this->prices['tiktok'];
+
+        if (!$link) { $this->error = 'Selecione um produto primeiro.'; return; }
+
+        if (empty(trim($this->tiktokQuery))) {
+            $this->tiktokQuery = $link->product_name;
+        }
+
+        if ($user->tokenBalance() < $cost) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        $this->tiktokError = null;
+        $result = app(TikTokService::class)->searchVideos($this->tiktokQuery);
+
+        if (isset($result['error'])) {
+            $this->tiktokError = $result['error'];
+            return;
+        }
+
+        $user->ensureTokenWallet()->debit($cost, "Busca TikTok — {$this->tiktokQuery}", "post:tiktok:{$link->id}");
+
+        UserPost::create([
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => 'tiktok',
+            'status'            => 'completed',
+            'credits_charged'   => $cost,
+            'result'            => ['query' => $this->tiktokQuery, 'count' => count($result['videos'])],
+        ]);
+
+        $this->tiktokResults = $result['videos'];
+    }
+
+    // ── TikTok Shop ──────────────────────────────────────────────────────────
+
+    public function searchTiktokShop(): void
+    {
+        $user = Auth::user();
+        $link = $this->selectedLink;
+        $cost = $this->prices['tiktok_shop'];
+
+        if (!$link) { $this->error = 'Selecione um produto primeiro.'; return; }
+
+        if (empty(trim($this->tiktokShopQuery))) {
+            $this->tiktokShopQuery = $link->product_name;
+        }
+
+        if ($user->tokenBalance() < $cost) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        $this->tiktokShopError = null;
+        $result = app(TikTokShopService::class)->searchProducts($this->tiktokShopQuery);
+
+        if (isset($result['error'])) {
+            $this->tiktokShopError = $result['error'];
+            return;
+        }
+
+        $user->ensureTokenWallet()->debit($cost, "Busca TikTok Shop — {$this->tiktokShopQuery}", "post:tiktok_shop:{$link->id}");
+
+        UserPost::create([
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => 'tiktok_shop',
+            'status'            => 'completed',
+            'credits_charged'   => $cost,
+            'result'            => ['query' => $this->tiktokShopQuery, 'count' => count($result['products'])],
+        ]);
+
+        $this->tiktokShopResults = $result['products'];
+    }
+
+    // ── Facebook Ad Library ──────────────────────────────────────────────────
+
+    public function searchFbAds(): void
+    {
+        $user = Auth::user();
+        $link = $this->selectedLink;
+        $cost = $this->prices['fb_adlibrary'];
+
+        if (!$link) { $this->error = 'Selecione um produto primeiro.'; return; }
+
+        if (empty(trim($this->fbAdQuery))) {
+            $this->fbAdQuery = $link->product_name;
+        }
+
+        if ($user->tokenBalance() < $cost) {
+            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
+            return;
+        }
+
+        $this->fbAdError = null;
+        $result = app(FacebookAdLibraryService::class)->searchAds($this->fbAdQuery);
+
+        if (isset($result['error'])) {
+            $this->fbAdError = $result['error'];
+            return;
+        }
+
+        $user->ensureTokenWallet()->debit($cost, "Busca FB AdLibrary — {$this->fbAdQuery}", "post:fb_adlibrary:{$link->id}");
+
+        UserPost::create([
+            'user_id'           => $user->id,
+            'affiliate_link_id' => $link->id,
+            'type'              => 'fb_adlibrary',
+            'status'            => 'completed',
+            'credits_charged'   => $cost,
+            'result'            => ['query' => $this->fbAdQuery, 'count' => count($result['ads'])],
+        ]);
+
+        $this->fbAdResults = $result['ads'];
     }
 
     // ── Telegram broadcast ────────────────────────────────────────────────────

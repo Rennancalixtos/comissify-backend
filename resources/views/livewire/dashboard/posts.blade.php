@@ -11,6 +11,51 @@
             'soon'  => false,
         ],
         [
+            'key'   => 'pinterest',
+            'label' => 'Buscar no Pinterest',
+            'desc'  => 'Encontra imagens e vídeos relacionados ao produto no Pinterest para usar como referência ou inspiração para seus posts.',
+            'cost'  => $this->prices['pinterest'],
+            'color' => '#e60023',
+            'icon'  => 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z',
+            'soon'  => false,
+        ],
+        [
+            'key'   => 'tiktok',
+            'label' => 'Buscar no TikTok',
+            'desc'  => 'Encontra vídeos no TikTok semelhantes ao produto selecionado para usar como referência ou inspiração nos seus conteúdos.',
+            'cost'  => $this->prices['tiktok'],
+            'color' => '#00f2ea',
+            'icon'  => 'M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z',
+            'soon'  => false,
+        ],
+        [
+            'key'   => 'tiktok_shop',
+            'label' => 'Buscar no TikTok Shop',
+            'desc'  => 'Pesquisa concorrentes no TikTok Shop: veja preços praticados, quantidade vendida e imagens de referência para o produto.',
+            'cost'  => $this->prices['tiktok_shop'],
+            'color' => '#ff6550',
+            'icon'  => 'M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+            'soon'  => false,
+        ],
+        [
+            'key'   => 'fb_adlibrary',
+            'label' => 'Facebook AdLibrary',
+            'desc'  => 'Pesquisa anúncios ativos relacionados ao produto na biblioteca de anúncios do Facebook para inspirar suas campanhas.',
+            'cost'  => $this->prices['fb_adlibrary'],
+            'color' => '#1877f2',
+            'icon'  => 'M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm3 8.25h-1.875v-1.5a.375.375 0 01.375-.375h1.5V6.75h-1.5A2.625 2.625 0 0010.875 9.375v1.125H9.75V12h1.125v6h1.875v-6H14.25l.75-1.5z',
+            'soon'  => false,
+        ],
+        [
+            'key'   => 'telegram',
+            'label' => 'Enviar no Telegram',
+            'desc'  => 'Envia o produto direto para um ou vários grupos do Telegram usando o template configurado. Ideal para divulgação em massa.',
+            'cost'  => $this->prices['telegram'],
+            'color' => '#2AABEE',
+            'icon'  => 'M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z',
+            'soon'  => false,
+        ],
+        [
             'key'   => 'image',
             'label' => 'Imagem com IA',
             'desc'  => 'Cria uma imagem promocional do produto gerada por inteligência artificial. Ideal para feed do Instagram, stories e anúncios.',
@@ -27,24 +72,6 @@
             'color' => '#f59e0b',
             'icon'  => 'M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z',
             'soon'  => true,
-        ],
-        [
-            'key'   => 'pinterest',
-            'label' => 'Buscar no Pinterest',
-            'desc'  => 'Encontra imagens e vídeos relacionados ao produto no Pinterest para usar como referência ou inspiração para seus posts.',
-            'cost'  => $this->prices['pinterest'],
-            'color' => '#e60023',
-            'icon'  => 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 10.607z',
-            'soon'  => false,
-        ],
-        [
-            'key'   => 'telegram',
-            'label' => 'Enviar no Telegram',
-            'desc'  => 'Envia o produto direto para um ou vários grupos do Telegram usando o template configurado. Ideal para divulgação em massa.',
-            'cost'  => $this->prices['telegram'],
-            'color' => '#2AABEE',
-            'icon'  => 'M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z',
-            'soon'  => false,
         ],
     ];
 @endphp
@@ -331,6 +358,51 @@
         @if($pinterestError)
         <p class="text-xs text-red-400">{{ $pinterestError }}</p>
         @endif
+        @elseif($activeTab === 'tiktok')
+        <div class="flex gap-2">
+            <input wire:model="tiktokQuery" type="text"
+                   class="form-input flex-1"
+                   placeholder="Palavra-chave para buscar..."
+                   @keydown.enter="$wire.searchTiktok()"/>
+            <button wire:click="searchTiktok" wire:loading.attr="disabled"
+                    class="btn-primary !px-5 flex-shrink-0">
+                <span wire:loading.remove wire:target="searchTiktok">Buscar</span>
+                <span wire:loading wire:target="searchTiktok">Buscando...</span>
+            </button>
+        </div>
+        @if($tiktokError)
+        <p class="text-xs text-red-400">{{ $tiktokError }}</p>
+        @endif
+        @elseif($activeTab === 'tiktok_shop')
+        <div class="flex gap-2">
+            <input wire:model="tiktokShopQuery" type="text"
+                   class="form-input flex-1"
+                   placeholder="Produto para buscar..."
+                   @keydown.enter="$wire.searchTiktokShop()"/>
+            <button wire:click="searchTiktokShop" wire:loading.attr="disabled"
+                    class="btn-primary !px-5 flex-shrink-0">
+                <span wire:loading.remove wire:target="searchTiktokShop">Buscar</span>
+                <span wire:loading wire:target="searchTiktokShop">Buscando...</span>
+            </button>
+        </div>
+        @if($tiktokShopError)
+        <p class="text-xs text-red-400">{{ $tiktokShopError }}</p>
+        @endif
+        @elseif($activeTab === 'fb_adlibrary')
+        <div class="flex gap-2">
+            <input wire:model="fbAdQuery" type="text"
+                   class="form-input flex-1"
+                   placeholder="Palavra-chave para buscar..."
+                   @keydown.enter="$wire.searchFbAds()"/>
+            <button wire:click="searchFbAds" wire:loading.attr="disabled"
+                    class="btn-primary !px-5 flex-shrink-0">
+                <span wire:loading.remove wire:target="searchFbAds">Buscar</span>
+                <span wire:loading wire:target="searchFbAds">Buscando...</span>
+            </button>
+        </div>
+        @if($fbAdError)
+        <p class="text-xs text-red-400">{{ $fbAdError }}</p>
+        @endif
         @elseif($activeTab === 'telegram')
         {{-- Seleção de grupos --}}
         @php $groups = $this->telegramGroups; @endphp
@@ -404,7 +476,7 @@
                 $dlAsset = $pin['video_url'] ?? $pin['image_url'];
                 $dlUrl   = $dlAsset ? route('download.proxy', ['url' => $dlAsset]) : null;
             @endphp
-            <div class="relative group" style="background:#1C1C1C"
+            <div style="background:#1C1C1C"
                  x-data="{ playing: false,
                             play() {
                                 this.playing = true;
@@ -417,7 +489,7 @@
                           }">
                 <div class="aspect-square overflow-hidden relative">
                     <img x-show="!playing" src="{{ $pin['image_url'] }}" alt="{{ $pin['title'] }}"
-                         class="w-full h-full object-cover" :class="!playing ? 'group-hover:opacity-70 transition-opacity' : ''">
+                         class="w-full h-full object-cover">
                     @if($isVideo)
                     <video x-ref="vid" x-show="playing" class="w-full h-full object-cover bg-black"
                            data-src="{{ $pin['video_url'] }}" controls playsinline @click.stop></video>
@@ -436,20 +508,173 @@
                     </button>
                     @endif
                 </div>
-                <div x-show="!playing"
-                     class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity p-2 pointer-events-none"
-                     style="background:linear-gradient(to top, rgba(0,0,0,0.85), transparent)">
-                    <div class="w-full flex gap-1.5 pointer-events-auto">
-                        <a href="{{ $pin['link'] ?? '#' }}" target="_blank" rel="noopener"
-                           class="flex-1 text-center text-xs font-medium text-white py-1 rounded-lg"
-                           style="background:rgba(255,255,255,0.15)" @click.stop>Abrir</a>
-                        @if($dlUrl)
-                        <a href="{{ $dlUrl }}"
-                           class="flex-1 text-center text-xs font-medium text-white py-1 rounded-lg"
-                           style="background:var(--color-primary)" @click.stop>Baixar</a>
-                        @endif
+                {{-- Barra de ações fixa — visível sempre, inclusive no mobile --}}
+                <div x-show="!playing" class="flex gap-1.5 p-2" style="background:#272727">
+                    <a href="{{ $pin['link'] ?? '#' }}" target="_blank" rel="noopener"
+                       class="flex-1 text-center text-xs font-medium text-white py-1.5 rounded-lg"
+                       style="background:rgba(255,255,255,0.12)">Abrir</a>
+                    @if($dlUrl)
+                    <a href="{{ $dlUrl }}"
+                       class="flex-1 text-center text-xs font-semibold text-white py-1.5 rounded-lg"
+                       style="background:var(--color-primary)">Baixar</a>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Resultado TikTok --}}
+    @if(!empty($tiktokResults))
+    <div class="card !p-0 overflow-hidden">
+        <div class="px-4 py-3 border-b border-d-border flex items-center justify-between">
+            <p class="text-sm font-semibold text-d-text">{{ count($tiktokResults) }} vídeos encontrados</p>
+            <span class="text-xs text-d-muted">Prévia e download disponíveis</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px" style="background:rgba(255,255,255,0.04)">
+            @foreach($tiktokResults as $video)
+            @php
+                $dlUrl = route('download.proxy', ['url' => $video['share_url']]);
+            @endphp
+            <div style="background:#1C1C1C"
+                 x-data="{ playing: false,
+                            play() {
+                                this.playing = true;
+                                let v = this.$refs.vid;
+                                if (v.dataset.src) { v.src = v.dataset.src; }
+                                v.play();
+                            },
+                            stop() { this.playing = false; this.$refs.vid.pause(); }
+                          }">
+                <div class="aspect-[9/16] overflow-hidden relative">
+                    <img x-show="!playing"
+                         src="{{ $video['thumbnail'] }}" alt="{{ $video['desc'] }}"
+                         class="w-full h-full object-cover"
+                         loading="lazy">
+                    @if($video['video_url'])
+                    <video x-ref="vid" x-show="playing"
+                           class="w-full h-full object-cover bg-black"
+                           data-src="{{ $video['video_url'] }}"
+                           controls playsinline @click.stop></video>
+                    <button x-show="!playing" @click.stop="play()"
+                            class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                             style="background:rgba(0,0,0,0.65)">
+                            <svg class="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </button>
+                    <button x-show="playing" @click.stop="stop()"
+                            class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center z-10"
+                            style="background:rgba(0,0,0,0.7)">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    @endif
+                </div>
+                {{-- Barra fixa com info + download — visível sempre, inclusive no mobile --}}
+                <div x-show="!playing" class="p-2" style="background:#272727">
+                    <div class="flex items-center justify-between gap-1 mb-1.5">
+                        <p class="text-xs font-semibold text-d-text truncate">{{ $video['author'] }}</p>
+                        <div class="flex items-center gap-1.5 text-xs flex-shrink-0" style="color:#00f2ea">
+                            <span>{{ number_format($video['likes']) }} ❤</span>
+                        </div>
+                    </div>
+                    <a href="{{ $dlUrl }}"
+                       class="w-full text-center text-xs font-semibold text-white py-1.5 rounded-lg block"
+                       style="background:rgba(0,242,234,0.15);color:#00f2ea;border:1px solid rgba(0,242,234,0.25)">
+                        Baixar vídeo
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Resultado TikTok Shop --}}
+    @if(!empty($tiktokShopResults))
+    <div class="card !p-0 overflow-hidden">
+        <div class="px-4 py-3 border-b border-d-border flex items-center justify-between">
+            <p class="text-sm font-semibold text-d-text">{{ count($tiktokShopResults) }} concorrentes encontrados</p>
+            <span class="text-xs text-d-muted">Pesquisa de mercado · TikTok Shop BR</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px" style="background:rgba(255,255,255,0.04)">
+            @foreach($tiktokShopResults as $product)
+            <div class="flex flex-col gap-2 p-3" style="background:#1C1C1C">
+                <div class="aspect-square overflow-hidden rounded-lg" style="background:#272727">
+                    <img src="{{ $product['image'] }}" alt="{{ $product['title'] }}"
+                         class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <p class="text-xs font-medium text-d-text line-clamp-2 leading-relaxed">{{ $product['title'] }}</p>
+                @if($product['shop'])
+                <p class="text-xs text-d-muted truncate">{{ $product['shop'] }}</p>
+                @endif
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-sm font-bold" style="color:#ff6550">{{ $product['currency'] }}{{ $product['price'] }}</span>
+                    @if($product['discount'])
+                    <span class="text-xs px-1 rounded" style="background:rgba(255,101,80,.15);color:#ff6550">{{ $product['discount'] }}</span>
+                    @endif
+                </div>
+                @if($product['rating'] || $product['sold'])
+                <div class="flex items-center gap-1 text-xs text-d-muted">
+                    @if($product['rating'])
+                    <span style="color:#fbbf24">★</span>
+                    <span>{{ $product['rating'] }}</span>
+                    @endif
+                    @if($product['sold'])
+                    <span class="text-d-muted">· {{ number_format($product['sold']) }} vendidos</span>
+                    @endif
+                </div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Resultado Facebook Ad Library --}}
+    @if(!empty($fbAdResults))
+    <div class="card !p-0 overflow-hidden">
+        <div class="px-4 py-3 border-b border-d-border flex items-center justify-between">
+            <p class="text-sm font-semibold text-d-text">{{ count($fbAdResults) }} anúncios encontrados</p>
+            <span class="text-xs text-d-muted">Anúncios ativos no Brasil</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-px" style="background:rgba(255,255,255,0.04)">
+            @foreach($fbAdResults as $ad)
+            <div class="flex flex-col gap-3 p-4" style="background:#1C1C1C">
+                {{-- Cabeçalho: página --}}
+                <div class="flex items-start gap-2">
+                    <div>
+                        <p class="text-xs font-bold text-d-text">{{ $ad['page_name'] }}</p>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            @foreach($ad['platforms'] as $platform)
+                            <span class="text-xs px-1.5 py-0.5 rounded" style="background:rgba(24,119,242,.15);color:#1877f2">{{ $platform }}</span>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
+                {{-- Imagem --}}
+                @if($ad['image'])
+                <div class="overflow-hidden rounded-lg" style="background:#272727;max-height:200px">
+                    <img src="{{ $ad['image'] }}" alt="{{ $ad['page_name'] }}"
+                         class="w-full object-cover" loading="lazy"
+                         style="max-height:200px">
+                </div>
+                @endif
+                {{-- Texto --}}
+                @if($ad['text'])
+                <p class="text-xs text-d-muted leading-relaxed line-clamp-4">{{ $ad['text'] }}</p>
+                @endif
+                {{-- CTA --}}
+                @if($ad['cta'])
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs px-2 py-1 rounded font-semibold" style="background:rgba(24,119,242,.15);color:#1877f2">
+                        {{ $ad['cta'] }}
+                    </span>
+                </div>
+                @endif
             </div>
             @endforeach
         </div>
@@ -579,6 +804,15 @@
 
                 @elseif($activeTab === 'pinterest' && $post['status'] === 'completed')
                 <p class="text-xs text-d-muted">{{ count($result['pins'] ?? []) }} pins para <span class="text-d-text">"{{ $result['query'] ?? '' }}"</span></p>
+
+                @elseif($activeTab === 'tiktok' && $post['status'] === 'completed')
+                <p class="text-xs text-d-muted">{{ $result['count'] ?? 0 }} vídeos para <span class="text-d-text">"{{ $result['query'] ?? '' }}"</span></p>
+
+                @elseif($activeTab === 'tiktok_shop' && $post['status'] === 'completed')
+                <p class="text-xs text-d-muted">{{ $result['count'] ?? 0 }} produtos para <span class="text-d-text">"{{ $result['query'] ?? '' }}"</span></p>
+
+                @elseif($activeTab === 'fb_adlibrary' && $post['status'] === 'completed')
+                <p class="text-xs text-d-muted">{{ $result['count'] ?? 0 }} anúncios para <span class="text-d-text">"{{ $result['query'] ?? '' }}"</span></p>
 
                 @elseif(in_array($post['status'], ['pending', 'processing']))
                 <div class="flex items-center gap-2">
