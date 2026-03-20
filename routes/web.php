@@ -11,7 +11,7 @@ Route::get('/termos',          fn() => view('terms'))->name('terms');
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');
-Route::post('/login',  [\App\Http\Controllers\Auth\AuthController::class, 'login'])->name('login.post');
+Route::post('/login',  [\App\Http\Controllers\Auth\AuthController::class, 'login'])->middleware('throttle:10,1')->name('login.post');
 Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
 
 // Multi-step registration — Livewire component
@@ -20,11 +20,11 @@ Route::get('/register', \App\Livewire\Auth\Register::class)->name('register');
 // ─── Conectar Shopee ──────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     Route::get('/connect',  [\App\Http\Controllers\ConnectController::class, 'show'])->name('connect');
-    Route::post('/connect', [\App\Http\Controllers\ConnectController::class, 'store'])->name('connect.store');
+    Route::post('/connect', [\App\Http\Controllers\ConnectController::class, 'store'])->middleware('throttle:5,1')->name('connect.store');
 });
 
 // ─── Proxy de download (imagens/vídeos externos) ──────────────────────────────
-Route::middleware('auth')->get('/download-proxy', [\App\Http\Controllers\DownloadProxyController::class, 'download'])->name('download.proxy');
+Route::middleware(['auth', 'throttle:20,1'])->get('/download-proxy', [\App\Http\Controllers\DownloadProxyController::class, 'download'])->name('download.proxy');
 
 // ─── Dashboard do cliente (auth only — mostra bloqueado se sem Shopee) ────────
 Route::middleware('auth')->group(function () {
