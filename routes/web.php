@@ -53,17 +53,17 @@ Route::post('/webhook/telegram', [\App\Http\Controllers\TelegramWebhookControlle
 // ─── Admin ────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/',           \App\Livewire\Admin\Dashboard::class)->name('dashboard');
-    Route::get('/products',   \App\Livewire\Admin\Products::class)->name('products.index');
-    Route::get('/videos',     \App\Livewire\Admin\Videos::class)->name('videos.index');
-    Route::get('/queue',      \App\Livewire\Admin\Queue::class)->name('queue.index');
-    Route::get('/accounts',   \App\Livewire\Admin\Accounts::class)->name('accounts.index');
-    Route::get('/settings',   \App\Livewire\Admin\Settings::class)->name('settings.index');
+    Route::get('/',            \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+    Route::get('/queue',       \App\Livewire\Admin\Queue::class)->name('queue.index');
+    Route::get('/settings',    \App\Livewire\Admin\Settings::class)->name('settings.index');
 
     // Fase 3
-    Route::get('/tokens',     \App\Livewire\Admin\Tokens::class)->name('tokens.index');
-    Route::get('/users',      \App\Livewire\Admin\Users::class)->name('users.index');
+    Route::get('/tokens',      \App\Livewire\Admin\Tokens::class)->name('tokens.index');
+    Route::get('/users',       \App\Livewire\Admin\Users::class)->name('users.index');
 
     // Fase 5
     Route::get('/screenshots', \App\Livewire\Admin\Screenshots::class)->name('screenshots.index');
+
+    // Fase 8
+    Route::get('/emails',      \App\Livewire\Admin\Emails::class)->name('emails.index');
 });
