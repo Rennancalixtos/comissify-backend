@@ -24,6 +24,9 @@ echo "✅ Banco disponível."
 echo "🔄 Rodando migrations..."
 php artisan migrate --force
 
+echo "🔗 Criando symlink de storage..."
+php artisan storage:link --force
+
 echo "⚡ Otimizando..."
 php artisan config:cache
 php artisan route:cache
