@@ -10,7 +10,7 @@
                 <h2 class="text-base font-semibold text-d-text">Screenshots da Landing Page</h2>
                 <p class="text-xs text-d-muted mt-0.5">Imagens exibidas no slideshow da página inicial</p>
             </div>
-            <button wire:click="openNew" class="btn-primary !text-xs !py-1.5 !px-3">+ Adicionar</button>
+            <a href="{{ route('admin.screenshots.create') }}" class="btn-primary !text-xs !py-1.5 !px-3">+ Adicionar</a>
         </div>
 
         <div class="overflow-x-auto">
@@ -44,7 +44,7 @@
                         </td>
                         <td class="px-4 py-3 text-center">
                             <div class="flex items-center justify-center gap-3">
-                                <button wire:click="openEdit({{ $s['id'] }})" class="text-xs text-blue-400 hover:underline">Editar</button>
+                                <a href="{{ route('admin.screenshots.edit', $s['id']) }}" class="text-xs text-blue-400 hover:underline">Editar</a>
                                 <button wire:click="delete({{ $s['id'] }})" wire:confirm="Excluir este screenshot?" class="text-xs text-red-400 hover:underline">Excluir</button>
                             </div>
                         </td>

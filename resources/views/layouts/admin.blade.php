@@ -104,7 +104,8 @@
         </header>
 
         <main class="flex-1 p-6 overflow-auto">
-            {{ $slot }}
+            {{ $slot ?? '' }}
+            @yield('content')
         </main>
     </div>
 </div>
