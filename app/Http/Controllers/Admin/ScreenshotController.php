@@ -22,7 +22,7 @@ class ScreenshotController extends Controller
 
         $manager  = new ImageManager(new Driver());
         $img      = $manager->read($request->file('image')->getRealPath());
-        $img->cover(1600, 1000);
+        $img->scaleDown(1600, 1000);
 
         $filename = 'landing/' . Str::uuid() . '.jpg';
         $fullPath = storage_path('app/public/' . $filename);
@@ -58,7 +58,7 @@ class ScreenshotController extends Controller
         if ($request->hasFile('image')) {
             $manager  = new ImageManager(new Driver());
             $img      = $manager->read($request->file('image')->getRealPath());
-            $img->cover(1600, 1000);
+            $img->scaleDown(1600, 1000);
 
             $filename = 'landing/' . Str::uuid() . '.jpg';
             $fullPath = storage_path('app/public/' . $filename);

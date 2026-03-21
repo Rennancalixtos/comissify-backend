@@ -226,7 +226,7 @@
 
                 @if($screenshots->isNotEmpty())
                     <div class="relative rounded-2xl overflow-hidden border border-d-border shadow-2xl"
-                         style="background:#111111;aspect-ratio:16/10;">
+                         style="background:#111111;aspect-ratio:40/21;">
                         @foreach($screenshots as $i => $s)
                         <div x-show="current === {{ $i }}"
                              x-transition:enter="transition ease-out duration-500"
