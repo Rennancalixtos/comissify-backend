@@ -28,8 +28,11 @@ class Tokens extends Component
     public float  $pricePostText  = 0;
     public float  $pricePostImage = 0;
     public float  $pricePostVideo = 0;
-    public float  $pricePostPin   = 0;
-    public float  $pricePostTg    = 0;
+    public float  $pricePostPin        = 0;
+    public float  $pricePostTg         = 0;
+    public float  $pricePostTiktok     = 0;
+    public float  $pricePostTiktokShop = 0;
+    public float  $pricePostFbAd       = 0;
 
     public bool   $showAddTokensModal = false;
     public ?int   $addTokensUserId    = null;
@@ -46,8 +49,11 @@ class Tokens extends Component
         $this->pricePostText  = SystemPrice::get('post_text_cost');
         $this->pricePostImage = SystemPrice::get('post_image_cost');
         $this->pricePostVideo = SystemPrice::get('post_video_cost');
-        $this->pricePostPin   = SystemPrice::get('post_pinterest_cost');
-        $this->pricePostTg    = SystemPrice::get('post_telegram_cost');
+        $this->pricePostPin        = SystemPrice::get('post_pinterest_cost');
+        $this->pricePostTg         = SystemPrice::get('post_telegram_cost');
+        $this->pricePostTiktok     = SystemPrice::get('post_tiktok_cost');
+        $this->pricePostTiktokShop = SystemPrice::get('post_tiktok_shop_cost');
+        $this->pricePostFbAd       = SystemPrice::get('post_fb_adlibrary_cost');
     }
 
 
@@ -119,17 +125,23 @@ class Tokens extends Component
             'pricePostText'  => 'required|numeric|min:0',
             'pricePostImage' => 'required|numeric|min:0',
             'pricePostVideo' => 'required|numeric|min:0',
-            'pricePostPin'   => 'required|numeric|min:0',
-            'pricePostTg'    => 'required|numeric|min:0',
+            'pricePostPin'        => 'required|numeric|min:0',
+            'pricePostTg'         => 'required|numeric|min:0',
+            'pricePostTiktok'     => 'required|numeric|min:0',
+            'pricePostTiktokShop' => 'required|numeric|min:0',
+            'pricePostFbAd'       => 'required|numeric|min:0',
         ]);
 
-        SystemPrice::set('search_cost',          $this->priceSearch);
-        SystemPrice::set('link_generation_cost', $this->priceLink);
-        SystemPrice::set('post_text_cost',       $this->pricePostText);
-        SystemPrice::set('post_image_cost',      $this->pricePostImage);
-        SystemPrice::set('post_video_cost',      $this->pricePostVideo);
-        SystemPrice::set('post_pinterest_cost',  $this->pricePostPin);
-        SystemPrice::set('post_telegram_cost',   $this->pricePostTg);
+        SystemPrice::set('search_cost',           $this->priceSearch);
+        SystemPrice::set('link_generation_cost',  $this->priceLink);
+        SystemPrice::set('post_text_cost',        $this->pricePostText);
+        SystemPrice::set('post_image_cost',       $this->pricePostImage);
+        SystemPrice::set('post_video_cost',       $this->pricePostVideo);
+        SystemPrice::set('post_pinterest_cost',   $this->pricePostPin);
+        SystemPrice::set('post_telegram_cost',    $this->pricePostTg);
+        SystemPrice::set('post_tiktok_cost',      $this->pricePostTiktok);
+        SystemPrice::set('post_tiktok_shop_cost', $this->pricePostTiktokShop);
+        SystemPrice::set('post_fb_adlibrary_cost',$this->pricePostFbAd);
 
         session()->flash('price_saved', 'Preços atualizados com sucesso.');
     }

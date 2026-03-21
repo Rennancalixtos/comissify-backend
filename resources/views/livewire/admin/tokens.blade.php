@@ -43,6 +43,18 @@
                 <label class="block text-xs text-d-muted mb-1.5">Envio Telegram por grupo (R$)</label>
                 <input wire:model="pricePostTg" type="number" step="0.000001" min="0" class="form-input w-full"/>
             </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Busca TikTok (R$)</label>
+                <input wire:model="pricePostTiktok" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Busca TikTok Shop (R$)</label>
+                <input wire:model="pricePostTiktokShop" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
+            <div>
+                <label class="block text-xs text-d-muted mb-1.5">Facebook AdLibrary (R$)</label>
+                <input wire:model="pricePostFbAd" type="number" step="0.000001" min="0" class="form-input w-full"/>
+            </div>
         </div>
 
         <button wire:click="savePrices" class="btn-primary !py-2 !px-5">Salvar preços</button>
