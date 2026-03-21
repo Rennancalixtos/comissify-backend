@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
+    libjpeg62-turbo-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
@@ -26,7 +27,8 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o 
     && chmod a+rx /usr/local/bin/yt-dlp
 
 # PHP extensions
-RUN docker-php-ext-install \
+RUN docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install \
     pdo_mysql \
     mbstring \
     exif \
