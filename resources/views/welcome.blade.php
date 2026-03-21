@@ -52,6 +52,18 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
+    {{-- Preload LCP image --}}
+    @php $firstShot = $screenshots->first(); @endphp
+    @if($firstShot && $firstShot->hasWebp())
+    <link rel="preload" as="image"
+          href="{{ $firstShot->webpUrl(828) }}"
+          imagesrcset="{{ $firstShot->webpUrl(640) }} 640w, {{ $firstShot->webpUrl(828) }} 828w, {{ $firstShot->webpUrl(1200) }} 1200w"
+          imagesizes="(max-width: 768px) 100vw, (max-width: 1200px) 518px, 634px"
+          fetchpriority="high">
+    @elseif($firstShot)
+    <link rel="preload" as="image" href="{{ Storage::url($firstShot->image_path) }}" fetchpriority="high">
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         {!! \App\Services\ThemeService::cssVars() !!}
@@ -239,10 +251,18 @@
                              x-transition:leave-end="opacity-0"
                              class="absolute inset-0"
                              style="display:none">
-                            <img src="{{ Storage::url($s->image_path) }}"
-                                 alt="{{ $s->title ?? 'Comissify - Plataforma de afiliados Shopee' }}"
-                                 class="w-full h-full object-contain"
-                                 @if($i === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif>
+                            <picture>
+                                @if($s->hasWebp())
+                                <source type="image/webp"
+                                        srcset="{{ $s->webpUrl(640) }} 640w, {{ $s->webpUrl(828) }} 828w, {{ $s->webpUrl(1200) }} 1200w"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 518px, 634px">
+                                @endif
+                                <img src="{{ Storage::url($s->image_path) }}"
+                                     alt="{{ $s->title ?? 'Comissify - Plataforma de afiliados Shopee' }}"
+                                     class="w-full h-full object-contain"
+                                     width="634" height="309"
+                                     @if($i === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif>
+                            </picture>
                             @if($s->title)
                             <div class="absolute bottom-0 left-0 right-0 px-4 py-3"
                                  style="background:linear-gradient(to top,rgba(0,0,0,0.7),transparent)">
@@ -482,6 +502,6 @@
     </div>
 </footer>
 
-@livewireScripts
+@vite(['resources/js/alpine.js'])
 </body>
 </html>
