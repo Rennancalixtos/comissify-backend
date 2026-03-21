@@ -87,7 +87,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users',       \App\Livewire\Admin\Users::class)->name('users.index');
 
     // Fase 5
-    Route::get('/screenshots', \App\Livewire\Admin\Screenshots::class)->name('screenshots.index');
+    Route::get('/screenshots',               \App\Livewire\Admin\Screenshots::class)->name('screenshots.index');
+    Route::get('/screenshots/create',        fn() => view('admin.screenshots.create'))->name('screenshots.create');
+    Route::post('/screenshots',              [\App\Http\Controllers\Admin\ScreenshotController::class, 'store'])->name('screenshots.store');
+    Route::get('/screenshots/{screenshot}/edit', fn(\App\Models\LandingScreenshot $screenshot) => view('admin.screenshots.edit', compact('screenshot')))->name('screenshots.edit');
+    Route::post('/screenshots/{screenshot}', [\App\Http\Controllers\Admin\ScreenshotController::class, 'update'])->name('screenshots.update');
 
     // Fase 8
     Route::get('/emails',      \App\Livewire\Admin\Emails::class)->name('emails.index');
