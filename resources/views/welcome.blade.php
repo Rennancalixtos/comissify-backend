@@ -58,7 +58,7 @@
     <link rel="preload" as="image"
           href="{{ $firstShot->webpUrl(828) }}"
           imagesrcset="{{ $firstShot->webpUrl(640) }} 640w, {{ $firstShot->webpUrl(828) }} 828w, {{ $firstShot->webpUrl(1200) }} 1200w"
-          imagesizes="(max-width: 768px) 100vw, (max-width: 1200px) 518px, 634px"
+          imagesizes="(max-width: 768px) calc(100vw - 3rem), (max-width: 1200px) 518px, 634px"
           fetchpriority="high">
     @elseif($firstShot)
     <link rel="preload" as="image" href="{{ Storage::url($firstShot->image_path) }}" fetchpriority="high">
@@ -255,7 +255,7 @@
                                 @if($s->hasWebp())
                                 <source type="image/webp"
                                         srcset="{{ $s->webpUrl(640) }} 640w, {{ $s->webpUrl(828) }} 828w, {{ $s->webpUrl(1200) }} 1200w"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 518px, 634px">
+                                        sizes="(max-width: 768px) calc(100vw - 3rem), (max-width: 1200px) 518px, 634px">
                                 @endif
                                 <img src="{{ Storage::url($s->image_path) }}"
                                      alt="{{ $s->title ?? 'Comissify - Plataforma de afiliados Shopee' }}"
