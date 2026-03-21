@@ -49,7 +49,8 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -77,8 +78,8 @@
 
         /* Shimmer */
         @keyframes btn-shimmer {
-            0%   { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
+            0%   { transform: translateX(-200%); }
+            100% { transform: translateX(300%); }
         }
 
         /* Glow pulse */
@@ -90,10 +91,11 @@
 
         /* Nav link glow pulse */
         @keyframes nav-glow-pulse {
-            0%, 100% { color: #9CA3AF; filter: drop-shadow(0 0 0px transparent); }
-            50%       { color: #e5e7eb; filter: drop-shadow(0 0 7px var(--color-primary)); }
+            0%, 100% { opacity: 0.6; }
+            50%       { opacity: 1; }
         }
         .nav-glow-pulse {
+            color: #e5e7eb;
             animation: nav-glow-pulse 2.5s ease-in-out infinite;
         }
 
@@ -182,7 +184,7 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-3 mb-6 animate-fade-up delay-300">
-                    <a href="{{ route('register') }}" class="btn-primary btn-shimmer !py-3 !px-8 !text-base font-display font-semibold" style="background-image:linear-gradient(110deg,var(--color-primary) 0%,var(--color-primary) 35%,rgba(255,255,255,0.35) 50%,var(--color-primary) 65%,var(--color-primary) 100%);background-size:250% 100%;background-position:100% 0;animation:btn-shimmer 2.5s ease-in-out infinite;">
+                    <a href="{{ route('register') }}" class="btn-primary btn-shimmer !py-3 !px-8 !text-base font-display font-semibold">
                         Começar grátis agora
                     </a>
                     <a href="{{ route('login') }}" class="btn-secondary !py-3 !px-8 !text-base">
@@ -239,7 +241,8 @@
                              style="display:none">
                             <img src="{{ Storage::url($s->image_path) }}"
                                  alt="{{ $s->title ?? 'Comissify - Plataforma de afiliados Shopee' }}"
-                                 class="w-full h-full object-contain">
+                                 class="w-full h-full object-contain"
+                                 @if($i === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif>
                             @if($s->title)
                             <div class="absolute bottom-0 left-0 right-0 px-4 py-3"
                                  style="background:linear-gradient(to top,rgba(0,0,0,0.7),transparent)">
@@ -251,16 +254,18 @@
 
                         @if($screenshotCount > 1)
                         <button type="button" @click="current = (current - 1 + total) % total"
+                                aria-label="Imagem anterior"
                                 class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-white"
                                 style="background:rgba(0,0,0,0.5)">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                             </svg>
                         </button>
                         <button type="button" @click="current = (current + 1) % total"
+                                aria-label="Próxima imagem"
                                 class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-white"
                                 style="background:rgba(0,0,0,0.5)">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </button>
@@ -271,6 +276,7 @@
                     <div class="flex justify-center gap-1.5 mt-4">
                         @foreach($screenshots as $i => $s)
                         <button type="button" @click="current = {{ $i }}"
+                                aria-label="Ir para imagem {{ $i + 1 }}"
                                 class="h-1.5 rounded-full transition-all duration-300"
                                 :style="current === {{ $i }} ? 'background:var(--color-primary);width:1.5rem;' : 'background:#2E2E2E;width:0.5rem'">
                         </button>
