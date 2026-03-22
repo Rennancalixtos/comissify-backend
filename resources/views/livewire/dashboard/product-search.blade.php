@@ -401,4 +401,10 @@
         </div>
     </div>
 
+    {{-- Suporte --}}
+    <p class="text-center text-xs text-d-muted pt-2 pb-1">
+        Dúvidas ou problemas? Entre em contato:
+        <a href="mailto:noreply@comissify.shop" class="font-medium hover:underline" style="color:var(--color-primary)">noreply@comissify.shop</a>
+    </p>
+
 </div>
