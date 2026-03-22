@@ -61,7 +61,7 @@
           imagesizes="(max-width: 768px) calc(100vw - 3rem), (max-width: 1200px) 518px, 634px"
           fetchpriority="high">
     @elseif($firstShot)
-    <link rel="preload" as="image" href="/storage/{{ $firstShot->image_path }}" fetchpriority="high">
+    <link rel="preload" as="image" href="{{ Storage::url($firstShot->image_path) }}" fetchpriority="high">
     @endif
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -257,7 +257,7 @@
                                         srcset="{{ $s->webpUrl(640) }} 640w, {{ $s->webpUrl(828) }} 828w, {{ $s->webpUrl(1200) }} 1200w"
                                         sizes="(max-width: 768px) calc(100vw - 3rem), (max-width: 1200px) 518px, 634px">
                                 @endif
-                                <img src="/storage/{{ $s->image_path }}"
+                                <img src="{{ Storage::url($s->image_path) }}"
                                      alt="{{ $s->title ?? 'Comissify - Plataforma de afiliados Shopee' }}"
                                      class="w-full h-full object-contain"
                                      width="634" height="309"
@@ -498,6 +498,7 @@
             <a href="{{ route('faq') }}" class="hover:text-d-text transition-colors">FAQ</a>
             <a href="{{ route('terms') }}" class="hover:text-d-text transition-colors">Termos de uso</a>
             <a href="{{ route('privacy') }}" class="hover:text-d-text transition-colors">Privacidade</a>
+            <a href="mailto:contato@comissify.shop" class="hover:text-d-text transition-colors">Contato</a>
         </div>
     </div>
 </footer>

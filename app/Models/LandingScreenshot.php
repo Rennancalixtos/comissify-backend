@@ -19,7 +19,7 @@ class LandingScreenshot extends Model
     public function webpUrl(int $width): string
     {
         $stem = pathinfo($this->image_path, PATHINFO_FILENAME);
-        return '/storage/landing/webp/' . $stem . '-' . $width . 'w.webp';
+        return Storage::url("landing/webp/{$stem}-{$width}w.webp");
     }
 
     public function hasWebp(): bool
