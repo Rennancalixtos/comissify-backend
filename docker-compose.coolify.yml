@@ -44,7 +44,7 @@ services:
     networks:
       - comissify-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=$${DB_ROOT_PASSWORD} 2>/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5

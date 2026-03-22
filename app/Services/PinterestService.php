@@ -17,10 +17,10 @@ class PinterestService
 
     public function __construct()
     {
-        $this->pythonBinary    = env('PYTHON_PATH', '/usr/bin/python3');
+        $this->pythonBinary    = config('services.python.path', '/usr/bin/python3');
         $this->scriptPath      = base_path('scripts/python/pinterest_downloader.py');
-        $this->ytdlpBin        = env('YTDLP_PATH', '/usr/local/bin/yt-dlp');
-        $this->downloadTimeout = (int) env('VIDEO_DOWNLOAD_TIMEOUT', 120);
+        $this->ytdlpBin        = config('services.ytdlp.path', '/usr/local/bin/yt-dlp');
+        $this->downloadTimeout = (int) config('services.python.download_timeout', 120);
         $this->searchTimeout   = 60;
     }
 

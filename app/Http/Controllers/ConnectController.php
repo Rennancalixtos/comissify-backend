@@ -6,6 +6,7 @@ use App\Models\UserCredential;
 use App\Services\ShopeeAffiliateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ConnectController extends Controller
 {
@@ -52,9 +53,6 @@ class ConnectController extends Controller
                 ->with('error', $result['error']);
         }
 
-        // Verificar se é a primeira vez que este AppID é conectado (para o bônus)
-        $isNewAppId = !UserCredential::where('app_id_hash', $appIdHash)->exists();
-
         UserCredential::updateOrCreate(
             ['user_id' => Auth::id()],
             [
@@ -69,10 +67,18 @@ class ConnectController extends Controller
         $user = Auth::user();
         $user->ensureTokenWallet();
 
-        // Bônus de boas-vindas — apenas na primeira conexão deste AppID
-        if ($isNewAppId) {
-            $bonus = (float) env('NEW_USER_TOKEN_BONUS', 0);
-            if ($bonus > 0) {
+        // Bônus de boas-vindas — mutex atômico via Cache::add() para evitar double-credit
+        // em requisições concorrentes com o mesmo AppID.
+        $bonusLockKey = "bonus_granted:{$appIdHash}";
+        $bonus        = (float) config('services.business.new_user_token_bonus', 0);
+
+        if ($bonus > 0 && Cache::add($bonusLockKey, true, now()->addSeconds(30))) {
+            // Verifica no banco se o AppID realmente é novo (dentro do lock)
+            $alreadyBonused = UserCredential::where('app_id_hash', $appIdHash)
+                ->where('user_id', '!=', Auth::id())
+                ->exists();
+
+            if (!$alreadyBonused) {
                 $user->ensureTokenWallet()->credit($bonus, 'Bônus de boas-vindas');
             }
         }

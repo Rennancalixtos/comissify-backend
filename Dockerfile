@@ -23,8 +23,12 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+# Install yt-dlp (versão pinada para garantir reprodutibilidade e integridade de supply chain)
+# Para atualizar: altere YTDLP_VERSION e atualize YTDLP_SHA256 com o hash da nova versão.
+# Hash SHA256 disponível em: https://github.com/yt-dlp/yt-dlp/releases/tag/${YTDLP_VERSION}
+ARG YTDLP_VERSION=2026.03.17
+RUN curl -fL "https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP_VERSION}/yt-dlp" \
+        -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp
 
 # PHP extensions

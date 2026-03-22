@@ -15,10 +15,10 @@ class AiTextService
 
     public function __construct()
     {
-        $this->provider    = env('AI_PROVIDER', 'anthropic');
+        $this->provider    = config('services.ai.provider', 'anthropic');
         $this->model       = $this->resolveModel();
-        $this->maxTokens   = (int) env('AI_MAX_TOKENS', 512);
-        $this->temperature = (float) env('AI_TEMPERATURE', 0.9);
+        $this->maxTokens   = (int) config('services.ai.max_tokens', 512);
+        $this->temperature = (float) config('services.ai.temperature', 0.9);
     }
 
     public function generateSearchTerms(Product $product): array
@@ -108,7 +108,7 @@ class AiTextService
     private function anthropic(string $system, string $user): string
     {
         $response = Http::withHeaders([
-            'x-api-key'         => env('ANTHROPIC_API_KEY'),
+            'x-api-key'         => config('services.anthropic.api_key'),
             'anthropic-version' => '2023-06-01',
             'content-type'      => 'application/json',
         ])->post('https://api.anthropic.com/v1/messages', [
@@ -128,7 +128,7 @@ class AiTextService
 
     private function openai(string $system, string $user): string
     {
-        $response = Http::withToken(env('OPENAI_API_KEY'))
+        $response = Http::withToken(config('services.openai.api_key'))
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model'       => $this->model,
                 'max_tokens'  => $this->maxTokens,
@@ -148,7 +148,7 @@ class AiTextService
 
     private function ollama(string $system, string $user): string
     {
-        $response = Http::post(env('OLLAMA_URL', 'http://localhost:11434').'/api/chat', [
+        $response = Http::post(config('services.ai.ollama_url', 'http://localhost:11434').'/api/chat', [
             'model'  => $this->model,
             'stream' => false,
             'messages' => [
@@ -177,10 +177,10 @@ class AiTextService
 
     private function resolveModel(): string
     {
-        return match (env('AI_PROVIDER', 'anthropic')) {
-            'openai'    => env('OPENAI_MODEL', 'gpt-4o-mini'),
-            'local'     => env('OLLAMA_MODEL', 'llama3'),
-            default     => env('AI_MODEL', 'claude-sonnet-4-20250514'),
+        return match (config('services.ai.provider', 'anthropic')) {
+            'openai'    => config('services.openai.model', 'gpt-4o-mini'),
+            'local'     => config('services.ai.ollama_model', 'llama3'),
+            default     => config('services.anthropic.model', 'claude-sonnet-4-20250514'),
         };
     }
 }

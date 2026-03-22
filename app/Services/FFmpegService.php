@@ -22,10 +22,10 @@ class FFmpegService
 
     public function __construct()
     {
-        $this->pythonBinary = env('PYTHON_PATH', '/usr/bin/python3');
+        $this->pythonBinary = config('services.python.path', '/usr/bin/python3');
         $this->scriptPath   = base_path('scripts/python/ffmpeg_validator.py');
-        $this->ffmpegBin    = env('FFMPEG_PATH', '/usr/bin/ffmpeg');
-        $this->ffprobeBin   = env('FFPROBE_PATH', '/usr/bin/ffprobe');
+        $this->ffmpegBin    = config('services.ffmpeg.binary', '/usr/bin/ffmpeg');
+        $this->ffprobeBin   = config('services.ffmpeg.ffprobe', '/usr/bin/ffprobe');
     }
 
     public function validate(string $path): array

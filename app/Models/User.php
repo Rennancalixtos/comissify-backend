@@ -12,7 +12,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'password', 'is_admin', 'is_active'];
+    // is_admin e is_active foram removidos do fillable para prevenir mass assignment.
+    // Esses campos só devem ser alterados via métodos/queries explícitas com autorização.
+    protected $fillable = ['name', 'email', 'phone', 'password'];
 
     protected $hidden = ['password', 'remember_token'];
 

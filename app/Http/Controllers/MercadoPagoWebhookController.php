@@ -39,7 +39,11 @@ class MercadoPagoWebhookController extends Controller
             $status  = $payment->status;
             $amount  = (float) $payment->transaction_amount;
 
-            Log::info("MP Webhook [payment:{$paymentId}] status:{$status} order:{$orderId}");
+            Log::info('MP Webhook recebido', [
+                'payment_id' => (int) $paymentId,
+                'status'     => preg_replace('/[^\w_]/', '', (string) $status),
+                'order_id'   => (int) $orderId,
+            ]);
 
             $order = PaymentOrder::find($orderId);
 
@@ -72,7 +76,10 @@ class MercadoPagoWebhookController extends Controller
                     "Compra de créditos — {$order->package->name}"
                 );
 
-                Log::info("MP Webhook: credited {$order->tokens_amount} tokens to user {$order->user_id}");
+                Log::info('MP Webhook: tokens creditados', [
+                    'tokens' => $order->tokens_amount,
+                    'user_id' => (int) $order->user_id,
+                ]);
             }
 
             return response('ok', 200);

@@ -6,6 +6,7 @@ use App\Models\UserTelegramGroup;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class TelegramWebhookController extends Controller
 {
@@ -17,7 +18,17 @@ class TelegramWebhookController extends Controller
             return response('Unauthorized', 401);
         }
 
-        $update = $request->all();
+        $update   = $request->all();
+        $updateId = (int) ($update['update_id'] ?? 0);
+
+        // Proteção de replay: descarta updates já processados (janela de 24h)
+        if ($updateId > 0) {
+            $cacheKey = "telegram_update:{$updateId}";
+            if (Cache::has($cacheKey)) {
+                return response('ok', 200);
+            }
+            Cache::put($cacheKey, true, now()->addHours(24));
+        }
 
         if (!isset($update['message'])) {
             return response('ok', 200);

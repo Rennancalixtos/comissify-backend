@@ -10,7 +10,6 @@ use App\Models\UserTelegramGroup;
 use App\Services\FacebookAdLibraryService;
 use App\Services\GeminiService;
 use App\Services\PinterestService;
-use App\Services\PollinationsService;
 use App\Services\TelegramService;
 use App\Services\TikTokService;
 use App\Services\TikTokShopService;
@@ -256,40 +255,8 @@ class Posts extends Component
 
     private function handleImagePost(mixed $user, UserAffiliateLink $link): void
     {
-        $cost = $this->prices['image'];
-
-        if ($user->tokenBalance() < $cost) {
-            $this->error = 'Saldo insuficiente. Necessário R$ ' . number_format($cost, 2, ',', '.') . ' em créditos.';
-            return;
-        }
-
-        $user->ensureTokenWallet()->debit($cost, "Imagem AI — {$link->product_name}", "post:image:{$link->id}");
-
-        $post = UserPost::create([
-            'user_id'           => $user->id,
-            'affiliate_link_id' => $link->id,
-            'type'              => 'image',
-            'status'            => 'pending',
-            'credits_charged'   => $cost,
-        ]);
-
-        $imageUrl = app(PollinationsService::class)->generate($link->product_name, $user->id);
-
-        if (!$imageUrl) {
-            // Reembolsa e marca como falha
-            $user->ensureTokenWallet()->credit($cost, "Reembolso Imagem AI", "refund:image:{$link->id}");
-            $post->update(['status' => 'failed', 'error_message' => 'Falha ao gerar imagem. Tente novamente.']);
-            $this->error = 'Falha ao gerar imagem. Tente novamente.';
-            return;
-        }
-
-        $post->update([
-            'status' => 'completed',
-            'result' => ['image_url' => $imageUrl, 'prompt' => $link->product_name],
-        ]);
-
-        $this->flashMsg = 'Imagem gerada com sucesso!';
-        $this->error    = null;
+        // Integração de geração de imagem por IA em breve.
+        $this->error = 'Geração de imagem com IA estará disponível em breve.';
     }
 
     private function handleVideoPost(mixed $user, UserAffiliateLink $link, string $type): void

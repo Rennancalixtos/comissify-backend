@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Register extends Component
@@ -26,6 +28,10 @@ class Register extends Component
     public string $otp3 = ''; public string $otp4 = '';
     public string $otp5 = ''; public string $otp6 = '';
     public ?string $otpError = null;
+
+    // #[Locked] impede que o cliente altere este valor via payload Livewire,
+    // prevenindo flood de email por manipulação do estado público.
+    #[Locked]
     public bool $canResend = false;
 
     public function rules(): array
@@ -35,7 +41,7 @@ class Register extends Component
                 'name'                  => ['required', 'string', 'min:2', 'max:100', 'regex:/^[\p{L}\s\'\-\.]+$/u'],
                 'email'                 => 'required|email:rfc|unique:users,email',
                 'phone'                 => 'required|digits_between:10,11|unique:users,phone',
-                'password'              => 'required|min:8|confirmed',
+                'password'              => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
                 'password_confirmation' => 'required',
             ],
             default => [],
@@ -90,6 +96,18 @@ class Register extends Component
 
     private function sendOtp(string $email): void
     {
+        // Rate limit server-side: máximo 3 reenvios por email a cada 10 minutos.
+        $rateLimitKey = "otp_send_rate:{$email}";
+        $sends        = (int) Cache::get($rateLimitKey, 0);
+
+        if ($sends >= 3) {
+            $this->otpError  = 'Limite de reenvios atingido. Tente novamente em alguns minutos.';
+            $this->canResend = false;
+            return;
+        }
+
+        Cache::put($rateLimitKey, $sends + 1, now()->addMinutes(10));
+
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         Cache::put("register_otp:{$email}", Hash::make($code), now()->addMinutes(15));
@@ -152,16 +170,20 @@ class Register extends Component
             return;
         }
 
-        // Só agora criamos o usuário no banco
+        // Só agora criamos o usuário no banco.
+        // is_admin e is_active não estão no $fillable — definidos via forceFill para
+        // garantir valores corretos sem expor a mass assignment.
         $user = User::create([
-            'name'              => $data['name'],
-            'email'             => $data['email'],
-            'phone'             => $data['phone'],
-            'password'          => $data['password'],
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'phone'    => $data['phone'],
+            'password' => $data['password'],
+        ]);
+        $user->forceFill([
             'is_admin'          => false,
             'is_active'         => true,
             'email_verified_at' => now(),
-        ]);
+        ])->save();
         $user->ensureTokenWallet();
 
         Cache::forget("register_otp:{$this->email}");

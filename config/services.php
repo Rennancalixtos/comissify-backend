@@ -2,6 +2,10 @@
 
 return [
 
+    'business' => [
+        'new_user_token_bonus' => env('NEW_USER_TOKEN_BONUS', 0),
+    ],
+
     'mailgun' => [
         'domain'   => env('MAILGUN_DOMAIN'),
         'secret'   => env('MAILGUN_SECRET'),
@@ -25,6 +29,24 @@ return [
 
     'ytdlp' => [
         'path' => env('YTDLP_PATH', '/usr/local/bin/yt-dlp'),
+    ],
+
+    'python' => [
+        'path'             => env('PYTHON_PATH', '/usr/bin/python3'),
+        'download_timeout' => env('VIDEO_DOWNLOAD_TIMEOUT', 120),
+    ],
+
+    'ffmpeg' => [
+        'binary'  => env('FFMPEG_BINARY', '/usr/bin/ffmpeg'),
+        'ffprobe' => env('FFPROBE_BINARY', '/usr/bin/ffprobe'),
+    ],
+
+    'ai' => [
+        'provider'    => env('AI_PROVIDER', 'anthropic'),
+        'max_tokens'  => env('AI_MAX_TOKENS', 512),
+        'temperature' => env('AI_TEMPERATURE', 0.7),
+        'ollama_url'  => env('OLLAMA_URL', 'http://localhost:11434'),
+        'ollama_model'=> env('OLLAMA_MODEL', 'llama3'),
     ],
 
     'shopee' => [

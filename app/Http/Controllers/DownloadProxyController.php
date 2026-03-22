@@ -24,7 +24,9 @@ class DownloadProxyController extends Controller
 
         $host = parse_url($url, PHP_URL_HOST);
 
-        // Resolve host to IP and block private ranges
+        // Resolve o IP UMA ÚNICA VEZ e reutiliza para o request real.
+        // Isso elimina o vetor de DNS rebinding: o atacante não consegue trocar o DNS
+        // entre a validação e o request HTTP efetivo.
         $ip = gethostbyname($host);
         if ($this->isPrivateIp($ip)) {
             abort(403, 'Domínio não permitido.');
@@ -33,7 +35,7 @@ class DownloadProxyController extends Controller
         $filename = 'media-' . substr(md5($url), 0, 8);
         $path     = strtolower(parse_url($url, PHP_URL_PATH) ?? '');
 
-        // Social media pages and HLS streams must use yt-dlp
+        // Social media pages and HLS streams must use yt-dlp (usa a URL original com host)
         $ytdlpDomains = ['tiktok.com', 'pinterest.com', 'instagram.com', 'youtube.com', 'youtu.be'];
         $needsYtdlp   = str_ends_with($path, '.m3u8')
             || collect($ytdlpDomains)->contains(fn($d) => str_contains($host, $d));
@@ -42,8 +44,10 @@ class DownloadProxyController extends Controller
             return $this->downloadWithYtdlp($url, $filename . '.mp4');
         }
 
-        // Direct file proxy
-        $response = Http::timeout(30)->get($url);
+        // Direct file proxy — usa URL com IP resolvido + SNI para TLS
+        $response = Http::timeout(30)
+            ->withOptions(['curl' => [CURLOPT_RESOLVE => ["{$host}:443:{$ip}", "{$host}:80:{$ip}"]]])
+            ->get($url);
 
         if (!$response->successful()) {
             // Fallback to yt-dlp for video URLs that refuse direct download
