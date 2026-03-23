@@ -25,7 +25,7 @@
         <div class="mt-5 pt-4 border-t border-d-border">
             <p class="text-xs text-d-muted">
                 Precisa de ajuda?
-                <a href="mailto:noreply@comissify.shop" class="font-medium hover:underline" style="color:var(--color-primary)">noreply@comissify.shop</a>
+                <a href="mailto:contato@comissify.shop" class="font-medium hover:underline" style="color:var(--color-primary)">contato@comissify.shop</a>
             </p>
         </div>
     </div>
