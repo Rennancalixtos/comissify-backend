@@ -1,0 +1,15 @@
+# Deploy do Comissify em modo demonstração no plano grátis do Render.
+# Render → New → Blueprint → escolha este repositório e a branch "demo".
+services:
+  - type: web
+    name: comissify-demo
+    runtime: docker
+    plan: free
+    branch: demo
+    dockerfilePath: ./Dockerfile.demo
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: Comissify
+      - key: APP_URL
+        value: https://comissify-demo.onrender.com

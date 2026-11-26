@@ -131,6 +131,15 @@
         </header>
 
         <main class="flex-1 p-6 overflow-auto">
+            @if (config('demo.enabled'))
+                <div class="mb-5 rounded-xl px-4 py-2.5 text-xs text-d-muted"
+                     style="background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.35)">
+                    🧪 <strong class="text-d-text">Demonstração:</strong> produtos, links e relatórios são fictícios. Pagamentos e envios reais estão desativados.
+                </div>
+            @endif
+            @if (session('demo_notice'))
+                <div class="alert-error mb-5">{{ session('demo_notice') }}</div>
+            @endif
             {{ $slot }}
         </main>
     </div>

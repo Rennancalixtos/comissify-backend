@@ -15,6 +15,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\FFmpegService::class);
         $this->app->singleton(\App\Services\AiTextService::class);
         $this->app->singleton(\App\Services\AppiumService::class);
+
+        if (config('demo.enabled')) {
+            $this->app->bind(
+                \App\Services\ShopeeAffiliateService::class,
+                \App\Services\Demo\DemoShopeeAffiliateService::class,
+            );
+        }
     }
 
     public function boot(): void

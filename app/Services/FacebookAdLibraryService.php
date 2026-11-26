@@ -11,7 +11,7 @@ class FacebookAdLibraryService
 
     public function __construct()
     {
-        $this->apiKey = config('services.scrapecreators.key');
+        $this->apiKey = (string) config('services.scrapecreators.key');
     }
 
     public function searchAds(string $query, int $limit = 12): array

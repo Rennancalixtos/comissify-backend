@@ -34,6 +34,17 @@ Route::get('/sitemap.xml', function () {
         ->header('Content-Type', 'application/xml');
 })->name('sitemap');
 
+// ─── Modo demonstração: imagens dos produtos fictícios ─────────────────────────
+if (config('demo.enabled')) {
+    Route::get('/demo/product-image/{id}', function (int $id) {
+        $svg = \App\Support\DemoCatalog::svg($id) ?? abort(404);
+        return response($svg, 200, [
+            'Content-Type'  => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    })->whereNumber('id')->name('demo.product-image');
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',   [\App\Http\Controllers\Auth\AuthController::class, 'show'])->name('login');
 Route::post('/login',  [\App\Http\Controllers\Auth\AuthController::class, 'login'])->middleware('throttle:10,1')->name('login.post');

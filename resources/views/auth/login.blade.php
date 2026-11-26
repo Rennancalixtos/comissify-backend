@@ -25,6 +25,19 @@
     <div class="card">
         <h2 class="text-base font-semibold text-d-text mb-5">Entrar na sua conta</h2>
 
+        @if (config('demo.enabled'))
+            <div class="mb-5 rounded-xl p-3 text-xs leading-relaxed"
+                 style="background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.35)">
+                <p class="font-semibold text-d-text mb-1">🧪 Versão de demonstração</p>
+                <p class="text-d-muted">Os dados de acesso já estão preenchidos, é só clicar em <strong>Entrar</strong>.
+                    Produtos, links e relatórios são fictícios e tudo é resetado periodicamente.</p>
+            </div>
+        @endif
+
+        @if (session('demo_notice'))
+            <div class="alert-error mb-4">{{ session('demo_notice') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('login.post') }}" class="space-y-4">
             @csrf
 
@@ -34,13 +47,14 @@
 
             <div>
                 <label class="block text-xs font-medium text-d-muted mb-1.5" for="email">E-mail</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" required
+                <input id="email" name="email" type="email" value="{{ old('email', config('demo.enabled') ? config('demo.email') : '') }}" required
                        class="form-input w-full" placeholder="seu@email.com" autofocus />
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-d-muted mb-1.5" for="password">Senha</label>
                 <input id="password" name="password" type="password" required
+                       @if (config('demo.enabled')) value="{{ config('demo.password') }}" @endif
                        class="form-input w-full" placeholder="••••••••" />
             </div>
 

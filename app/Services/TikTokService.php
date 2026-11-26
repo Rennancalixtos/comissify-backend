@@ -11,7 +11,7 @@ class TikTokService
 
     public function __construct()
     {
-        $this->apiKey = config('services.scrapecreators.key');
+        $this->apiKey = (string) config('services.scrapecreators.key');
     }
 
     public function searchVideos(string $query, int $limit = 12): array

@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '172.16.0.0/12',    // bridge networks Docker
             '192.168.0.0/16',   // rede local física
         ]);
+        $middleware->web(append: [\App\Http\Middleware\DemoMode::class]);
+
         $middleware->alias([
             'shopee.connected' => \App\Http\Middleware\EnsureShopeeConnected::class,
             'admin'            => \App\Http\Middleware\EnsureAdmin::class,
